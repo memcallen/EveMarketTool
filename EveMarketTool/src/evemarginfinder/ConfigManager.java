@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 /**
  *
- * @author austin-z
+ * @author Memcallen Kahoudi/Recursive Pineapple
  */
 public class ConfigManager {
 
