@@ -19,8 +19,10 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,8 +43,7 @@ import javax.swing.JCheckBox;
 public class DatabaseManager {
 
     //LOG FILE STUFF
-    
-    private static File logfile = new File("LOG-" + System.currentTimeMillis());//30001198
+    private static File logfile = new File("LOG-" + System.currentTimeMillis());
     private static OutputStream log_stream = null;
 
     private static OutputStream console_stream = new OutputStream() {
@@ -59,28 +60,7 @@ public class DatabaseManager {
 
     };
 
-    static {//create log file
-        
-        if (!logfile.exists()) {
-            try {
-                logfile.createNewFile();
-            } catch (IOException ex) {
-                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        
-        try {
-            log_stream = new FileOutputStream(logfile);
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        System.setOut(new PrintStream(System.console() == null ? log_stream : console_stream));
-
-    }
-    
     //END LOG FILE STUFF
-    
     public static class CheckBoxListener implements ItemListener {
 
         private boolean isgroup = true;
@@ -133,11 +113,54 @@ public class DatabaseManager {
 
     public static JsonParser parser = new JsonParser();
 
+    public static String getQueryURL(int[] itemids, int loc, boolean stat) {
+        String out = ConfigManager.get("uformat");
+
+        out = out.replace("{0}", ConfigManager.get("url"));
+
+        String typef = ConfigManager.get("type");
+
+        String types = ConfigManager.get("typeroot").replace("{0}",
+                IntStream.of(itemids).mapToObj(i -> typef.replace("{0}", Integer.toString(i))).reduce("", String::concat)
+        );
+
+        String location = ConfigManager.get(stat ? "station" : "region").replace("{0}", Integer.toString(loc));
+
+        return out.replace("{1}", types).replace("{2}", location);
+    }
+
     public static List<Vector> getMarketInfoBulk(int[] itemid, int sysid) {
+        
+        System.out.println(getQueryURL(itemid, sysid, true));
+        
+        JsonElement response = read(getQueryURL(itemid, sysid, true));
+        
+        QueryTranslator.TranslatedQuery[][] queries = QueryTranslator.translate(itemid, response);
+        
+        List<Vector> out = new ArrayList<>();
+        
+        for(int i = 0; i < itemid.length; i++){
+            
+            Vector v = new Vector();
+            
+            v.add(queryItemName(itemid[i]));
+            v.add((queries[0][i].topFive - queries[1][i].topFive)/queries[1][i].topFive);
+            v.add(queries[1][i].topFive);
+            v.add(Double.NaN);
+            v.add(queries[0][i].volume);
+            
+            out.add(v);
+        }
+        
+        return out;
+    }
 
-        String types = IntStream.of(itemid).mapToObj(id -> "&typeid=" + id).reduce("", (a, b) -> a + b);
+    @Deprecated
+    public static List<Vector> _getMarketInfoBulk(int[] itemid, int sysid) {
 
-        JsonArray root = read("http://api.eve-central.com/api/marketstat/json?" + types.substring(1) + "&usesystem=" + sysid)
+        System.out.println(getQueryURL(itemid, sysid, false));
+        
+        JsonArray root = read(getQueryURL(itemid, sysid, false))
                 .getAsJsonArray();
 
         List<Vector> vectors = new ArrayList<>();
@@ -174,35 +197,6 @@ public class DatabaseManager {
 
         return vectors;
 
-    }
-
-    @Deprecated
-    public static Vector getMarketInfo(int itemid, int sysid) {
-
-        JsonObject eve_central = read("http://api.eve-central.com/api/marketstat/json?typeid=" + itemid + "&usesystem=" + sysid)
-                .getAsJsonArray().get(0).getAsJsonObject();
-
-        JsonObject _buy = eve_central.get("buy").getAsJsonObject();
-        JsonObject _sell = eve_central.get("sell").getAsJsonObject();
-
-        double sell = _buy.get("fivePercent").getAsDouble();
-        double buy = _sell.get("fivePercent").getAsDouble();
-        int volume = _buy.get("volume").getAsInt();
-
-        double difference = buy - sell;
-        double margin = difference / buy;
-        double cost = sell;
-        double profit = volume / 24d * difference;
-
-        Vector out = new Vector();
-
-        out.add(queryItemName(itemid));
-        out.add(margin);
-        out.add(cost);
-        out.add(profit);
-        out.add(volume);
-
-        return out;
     }
 
     public static JsonElement read(String string) {
@@ -263,25 +257,25 @@ public class DatabaseManager {
 
     }
 
-    public void loadSystems() throws FileNotFoundException{
-        
+    public void loadSystems() throws FileNotFoundException {
+
         long pre = System.currentTimeMillis();
-        
+
         File file = new File(systemFile);
-        
-        try (Scanner scanner = new Scanner(new FileInputStream(file))){
-            while(scanner.hasNextLine()){
+
+        try (Scanner scanner = new Scanner(new FileInputStream(file))) {
+            while (scanner.hasNextLine()) {
                 String[] line = scanner.nextLine().split("\t");
-                
+
                 systems.put(Integer.valueOf(line[0]), line[2]);
-                
+
             }
         }
-        
+
         System.out.println("Loaded Systems in " + (System.currentTimeMillis() - pre) + " millis");
-        
+
     }
-    
+
     public void loadItems() throws FileNotFoundException {
 
         long pre = System.currentTimeMillis();
@@ -322,7 +316,6 @@ public class DatabaseManager {
         System.out.println("Loaded Groups in " + (System.currentTimeMillis() - pre) + " millis");
 
         //initilize front-end
-        
         loadItems();
         loadSystems();
 
@@ -406,7 +399,31 @@ public class DatabaseManager {
     }
 
     public static void main(String[] args) {
+
+        if (!logfile.exists()) {
+            try {
+                logfile.createNewFile();
+            } catch (IOException ex) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        if (Arrays.asList(args).contains("--debug")) {
+            try {
+                log_stream = new FileOutputStream(logfile);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            System.setOut(new PrintStream(log_stream));
+        }
+
         Thread t = new Thread(() -> {
+            
+            ConfigManager.load();
+            
+            QueryTranslator.init();
+            
             DatabaseManager man = new DatabaseManager();
 
             System.out.println("Initing stuff");
@@ -432,7 +449,7 @@ public class DatabaseManager {
         });
 
         t.setName("main-thread");
-        
+
         t.start();
     }
 
