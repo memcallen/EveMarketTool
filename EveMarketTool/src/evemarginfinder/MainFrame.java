@@ -20,7 +20,7 @@ import javax.swing.table.TableRowSorter;
  *
  * @author Memcallen Kahoudi/Recursive Pineapple
  */
-public class MainFrame extends javax.swing.JFrame {
+public final class MainFrame extends javax.swing.JFrame {
 
     public class CustomCellRenderer extends DefaultTableCellRenderer {
 
@@ -69,7 +69,6 @@ public class MainFrame extends javax.swing.JFrame {
     public DefaultTableModel table_model;
     public CustomCellRenderer cell = new CustomCellRenderer(0.1, 10000000);
 
-    public Vector<String> headers = new Vector();
     public Vector<Vector> output_table_data = new Vector();
 
     public int group_search_index = 0;
@@ -93,20 +92,13 @@ public class MainFrame extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
 
-        System.out.println("Doing table headers");
-        headers.add("Name");//string
-        headers.add("Margin");//double
-        headers.add("Cost");//double
-        headers.add("Profit");//double
-        headers.add("Volume");//int
+        System.out.println("Doing table stuff");
 
-        table_model = new DefaultTableModel(output_table_data, headers) {
-
-            Class[] clazz = new Class[]{String.class, Double.class, Double.class, Double.class, Integer.class};
+        table_model = new DefaultTableModel(output_table_data, ConfigManager.table_headers) {
 
             @Override
             public Class<?> getColumnClass(int column) {
-                return clazz[column];
+                return ConfigManager.table_classes[column];
             }
 
         };
@@ -125,7 +117,7 @@ public class MainFrame extends javax.swing.JFrame {
         initializeCheckBoxes();
 
         System.out.println("Packing");
-        pack();
+        //pack();
 
     }
 
@@ -180,6 +172,9 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel3 = new javax.swing.JPanel();
         parse_decoder = new javax.swing.JComboBox<>();
         jLabel12 = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        parse_table = new javax.swing.JComboBox<>();
+        parse_reload = new javax.swing.JButton();
         cfg_reload = new javax.swing.JButton();
 
         jCheckBox2.setText("jCheckBox2");
@@ -446,16 +441,40 @@ public class MainFrame extends javax.swing.JFrame {
 
         jLabel12.setText("API Decoder:");
 
+        jLabel13.setText("Table Generator:");
+
+        parse_table.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Generic Table" }));
+        parse_table.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                parse_tableActionPerformed(evt);
+            }
+        });
+
+        parse_reload.setText("Reload Parser Configs");
+        parse_reload.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                parse_reloadActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel12)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(parse_decoder, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(92, Short.MAX_VALUE))
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel12)
+                    .addComponent(jLabel13))
+                .addGap(9, 9, 9)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(parse_decoder, 0, 148, Short.MAX_VALUE)
+                    .addComponent(parse_table, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(64, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(parse_reload)
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -464,7 +483,13 @@ public class MainFrame extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel12)
                     .addComponent(parse_decoder, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel13)
+                    .addComponent(parse_table, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(parse_reload)
+                .addContainerGap())
         );
 
         cfg_reload.setText("Reload From File");
@@ -612,7 +637,7 @@ public class MainFrame extends javax.swing.JFrame {
             output_table_data.setSize(0);
 
             sysid = Integer.valueOf(system_id.getText());
-            
+
             int[] ids = Stream.of(model.toArray())
                     .map(Object::toString)
                     .mapToInt(DatabaseManager::queryItemId)
@@ -725,13 +750,26 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_cfg_saveActionPerformed
 
     private void cfg_resetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_resetActionPerformed
-        ConfigManager.setDefaults();
-        
+
+        ConfigManager.reset();
+
         refreshConfigVisuals();
     }//GEN-LAST:event_cfg_resetActionPerformed
 
     private void parse_decoderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parse_decoderActionPerformed
-        //TODO this
+        
+        if(parse_decoder.getItemCount() == 0){
+            return;
+        }
+        
+        String item = parse_decoder.getSelectedItem().toString();
+        
+        try{
+            ConfigManager.setActiveParser(item);
+        }catch(NullPointerException e){
+            JOptionPane.showMessageDialog(this, "Error: that decoder doesn't exist, this should never happen", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        
     }//GEN-LAST:event_parse_decoderActionPerformed
 
     private void onexit(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_onexit
@@ -740,19 +778,53 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void cfg_reloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_reloadActionPerformed
         ConfigManager.load();
-        
+
         refreshConfigVisuals();
     }//GEN-LAST:event_cfg_reloadActionPerformed
 
-    public void refreshConfigVisuals(){
+    private void parse_reloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parse_reloadActionPerformed
+        ConfigManager.loadParsers();
+
+        refreshConfigVisuals();
+    }//GEN-LAST:event_parse_reloadActionPerformed
+
+    private void parse_tableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parse_tableActionPerformed
+        
+        if(parse_table.getItemCount() == 0){
+            return;
+        }
+        
+        String item = parse_table.getSelectedItem().toString();
+        
+        try{
+            ConfigManager.setActiveTable(item);
+        }catch(NullPointerException e){
+            JOptionPane.showMessageDialog(this, "Error: that table generator doesn't exist, this should never happen", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        
+    }//GEN-LAST:event_parse_tableActionPerformed
+
+    public void refreshConfigVisuals() {
         cfg_format.setText(ConfigManager.get("uformat"));
         cfg_url.setText(ConfigManager.get("url"));
         cfg_idroot.setText(ConfigManager.get("typeroot"));
         cfg_id.setText(ConfigManager.get("type"));
         cfg_reg.setText(ConfigManager.get("region"));
         cfg_stat.setText(ConfigManager.get("station"));
+
+        parse_decoder.removeAllItems();
+        
+        ConfigManager.query_parsers.forEach((cfg) -> {
+            parse_decoder.addItem(cfg.name);
+        });
+        
+        parse_table.removeAllItems();
+        
+        ConfigManager.table_generators.forEach((cfg) -> {
+            parse_table.addItem(cfg.name);
+        });
     }
-    
+
     public void setSelectedGroup(int id, boolean selected) {
         for (int i = 0; i < ItemGroups_CheckBoxes.length; i++) {
             JCheckBox box = ItemGroups_CheckBoxes[i];
@@ -841,6 +913,8 @@ public class MainFrame extends javax.swing.JFrame {
 
         System.out.println("Created Checkboxes:Items in " + (System.currentTimeMillis() - pre) + " millis");
 
+        refreshConfigVisuals();
+
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -869,6 +943,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -887,6 +962,8 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JTextField min_margin_field;
     private javax.swing.JTable output_table;
     private javax.swing.JComboBox<String> parse_decoder;
+    private javax.swing.JButton parse_reload;
+    private javax.swing.JComboBox<String> parse_table;
     private javax.swing.JCheckBox rem_inv;
     private javax.swing.JList selected_items;
     private javax.swing.JButton selected_items_refresh;

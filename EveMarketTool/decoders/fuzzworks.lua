@@ -13,12 +13,8 @@ end
 
 function translate(json)
 	
-	
-	
 	buy = {}
 	sell = {}
-	
-	print(json)
 	
 	for k, id in pairs(getTypes())
 	do

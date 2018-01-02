@@ -24,6 +24,7 @@ import java.util.stream.Stream;
  *
  * @author Memcallen Kahoudi/Recursive Pineapple
  */
+@Deprecated
 public class CacheFileRefresher {
 
     private String read(URL url) {

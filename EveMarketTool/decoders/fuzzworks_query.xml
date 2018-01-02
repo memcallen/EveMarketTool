@@ -1,0 +1,15 @@
+<config>
+	<query-parser>
+		
+		<name>Fuzzworks</name>
+		<lua-file>fuzzworks.lua</lua-file>
+		
+	</query-parser>
+	
+	<table-generator>
+		
+		<name>Generic Table</name>
+		<lua-file>fuzzworks_table.lua</lua-file>
+		
+	</table-generator>
+</config>

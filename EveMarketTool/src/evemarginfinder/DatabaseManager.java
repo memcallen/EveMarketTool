@@ -98,16 +98,17 @@ public class DatabaseManager {
     }
 
     public ItemGroup[] groups;
-    public static Entry<Integer, String>[] items; //I should've used a map but oh well
-    public static HashMap<Integer, String> systems = new HashMap<>();
     public List<Integer> selected_items = new ArrayList<>();
     public Consumer<Integer> visual_selector_groups = System.out::println;
     public Consumer<Integer> visual_selector_items = System.out::println;
+    public MainFrame gui = null;
+    
+    public static Entry<Integer, String>[] items; //I should've used a map but oh well
+    public static HashMap<Integer, String> systems = new HashMap<>();
     public static String itemgroupFile = "groups.txt";
     public static String itemFile = "typeid.txt";
     public static String systemFile = "systems.txt";
-    public MainFrame gui = null;
-
+    
     public static Queue<Integer> groups_q = new LinkedList<>();
     public static Queue<Integer> items_q = new LinkedList<>();
 
@@ -131,72 +132,15 @@ public class DatabaseManager {
 
     public static List<Vector> getMarketInfoBulk(int[] itemid, int sysid) {
         
-        System.out.println(getQueryURL(itemid, sysid, true));
+        String url = getQueryURL(itemid, sysid, true);
         
-        JsonElement response = read(getQueryURL(itemid, sysid, true));
+        System.out.println("Querying " + url);
+        
+        JsonElement response = read(url);
         
         QueryTranslator.TranslatedQuery[][] queries = QueryTranslator.translate(itemid, response);
         
-        List<Vector> out = new ArrayList<>();
-        
-        for(int i = 0; i < itemid.length; i++){
-            
-            Vector v = new Vector();
-            
-            v.add(queryItemName(itemid[i]));
-            v.add((queries[0][i].topFive - queries[1][i].topFive)/queries[1][i].topFive);
-            v.add(queries[1][i].topFive);
-            v.add(Double.NaN);
-            v.add(queries[0][i].volume);
-            
-            out.add(v);
-        }
-        
-        return out;
-    }
-
-    @Deprecated
-    public static List<Vector> _getMarketInfoBulk(int[] itemid, int sysid) {
-
-        System.out.println(getQueryURL(itemid, sysid, false));
-        
-        JsonArray root = read(getQueryURL(itemid, sysid, false))
-                .getAsJsonArray();
-
-        List<Vector> vectors = new ArrayList<>();
-
-        for (int i = 0; i < root.size(); i++) {
-
-            JsonObject item = root.get(i).getAsJsonObject();
-
-            JsonObject _buy = item.get("buy").getAsJsonObject();
-            JsonObject _sell = item.get("sell").getAsJsonObject();
-
-            double sell = _buy.get("fivePercent").getAsDouble();
-            double buy = _sell.get("fivePercent").getAsDouble();
-            long volume = _buy.get("volume").getAsLong();
-
-            double difference = buy - sell;
-            double margin = difference / buy;
-            double cost = sell;
-            double profit = volume / 24d * difference;
-
-            Vector out = new Vector();
-
-            int id = _buy.get("forQuery").getAsJsonObject().get("types").getAsJsonArray().get(0).getAsInt();
-
-            out.add(queryItemName(id));
-            out.add(margin);
-            out.add(cost);
-            out.add(profit);
-            out.add(volume);
-
-            vectors.add(out);
-
-        }
-
-        return vectors;
-
+        return QueryTranslator.getTableData(queries);
     }
 
     public static JsonElement read(String string) {
@@ -423,6 +367,8 @@ public class DatabaseManager {
             ConfigManager.load();
             
             QueryTranslator.init();
+            
+            ConfigManager.loadHeaders();
             
             DatabaseManager man = new DatabaseManager();
 
