@@ -1,8 +1,6 @@
 package evemarginfinder;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.awt.EventQueue;
 import java.awt.event.ItemEvent;
@@ -17,9 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -43,10 +40,10 @@ import javax.swing.JCheckBox;
 public class DatabaseManager {
 
     //LOG FILE STUFF
-    private static File logfile = new File("LOG-" + System.currentTimeMillis());
+    private static final File LOGFILE = new File("LOG-" + System.currentTimeMillis());
     private static OutputStream log_stream = null;
 
-    private static OutputStream console_stream = new OutputStream() {
+    private static final OutputStream CONSOLE_STREAM = new OutputStream() {
 
         public Console out = System.console();
 
@@ -59,8 +56,8 @@ public class DatabaseManager {
         }
 
     };
-
     //END LOG FILE STUFF
+    
     public static class CheckBoxListener implements ItemListener {
 
         private boolean isgroup = true;
@@ -102,13 +99,13 @@ public class DatabaseManager {
     public Consumer<Integer> visual_selector_groups = System.out::println;
     public Consumer<Integer> visual_selector_items = System.out::println;
     public MainFrame gui = null;
-    
+
     public static Entry<Integer, String>[] items; //I should've used a map but oh well
     public static HashMap<Integer, String> systems = new HashMap<>();
     public static String itemgroupFile = "groups.txt";
     public static String itemFile = "typeid.txt";
     public static String systemFile = "systems.txt";
-    
+
     public static Queue<Integer> groups_q = new LinkedList<>();
     public static Queue<Integer> items_q = new LinkedList<>();
 
@@ -131,51 +128,25 @@ public class DatabaseManager {
     }
 
     public static List<Vector> getMarketInfoBulk(int[] itemid, int sysid) {
-        
+
         String url = getQueryURL(itemid, sysid, true);
-        
+
         System.out.println("Querying " + url);
+
+        JsonElement response;
+
+        try{
+            response = read(url);
+        }catch(IOException e){
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error Connecting to API", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
         
-        JsonElement response = read(url);
-        
-        QueryTranslator.TranslatedQuery[][] queries = QueryTranslator.translate(itemid, response);
-        
-        return QueryTranslator.getTableData(queries);
+        return QueryTranslator.getTableData(QueryTranslator.translate(itemid, response));
     }
 
-    public static JsonElement read(String string) {
-        try {
-            return parser.parse(new BufferedReader(new InputStreamReader(new URL(string).openStream())));
-        } catch (IOException ex) {
-            Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
-    }
-
-    public String read(URL url) {
-        String data = "";
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
-            data = reader.lines().reduce("", String::join);
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(CacheFileRefresher.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(CacheFileRefresher.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return data;
-    }
-
-    public String readS(String url) throws Exception {
-        String data = "";
-        Scanner scanner = new Scanner(new URL(url).openStream());
-
-        while (scanner.hasNextLine()) {
-            data += scanner.nextLine();
-        }
-
-        scanner.close();
-        return data;
+    public static JsonElement read(String string) throws IOException {
+        return parser.parse(new BufferedReader(new InputStreamReader(new URL(string).openStream())));
     }
 
     public static int queryItemId(String name) {
@@ -344,9 +315,9 @@ public class DatabaseManager {
 
     public static void main(String[] args) {
 
-        if (!logfile.exists()) {
+        if (!LOGFILE.exists()) {
             try {
-                logfile.createNewFile();
+                LOGFILE.createNewFile();
             } catch (IOException ex) {
                 Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -354,7 +325,7 @@ public class DatabaseManager {
 
         if (Arrays.asList(args).contains("--debug")) {
             try {
-                log_stream = new FileOutputStream(logfile);
+                log_stream = new FileOutputStream(LOGFILE);
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -363,13 +334,13 @@ public class DatabaseManager {
         }
 
         Thread t = new Thread(() -> {
-            
+
             ConfigManager.load();
-            
+
             QueryTranslator.init();
-            
+
             ConfigManager.loadHeaders();
-            
+
             DatabaseManager man = new DatabaseManager();
 
             System.out.println("Initing stuff");
@@ -385,12 +356,6 @@ public class DatabaseManager {
 
             while (true) {
                 man.checkSelections();
-
-                try {
-                    Thread.sleep(16);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
             }
         });
 

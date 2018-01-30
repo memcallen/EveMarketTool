@@ -12,13 +12,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 /**
- * I need to run this, but it requires an ethernet connection cause wifi is too slow
+ * I need to run this due to the moon mining update, but it requires an ethernet connection cause wifi is too slow
  * @author Memcallen Kahoudi/Recursive Pineapple
  */
 public class CacheFileUpdater {
@@ -54,7 +57,7 @@ public class CacheFileUpdater {
         try {
             data = read("https://esi.tech.ccp.is/latest/markets/groups/" + group);
         } catch (Exception ex) {
-            Logger.getLogger(CacheFileRefresher.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(CacheFileUpdater.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         JsonObject root = parser.parse(data)
@@ -124,7 +127,7 @@ public class CacheFileUpdater {
 
         doParents(groups);
 
-        System.out.println("Finished Resolving Parents (" + (System.currentTimeMillis() - pre) + ")Saving to File");
+        System.out.println("Finished Resolving Parents (" + (System.currentTimeMillis() - pre) + ")\nSaving to File");
 
         File out = new File("compiled");
 
@@ -138,10 +141,39 @@ public class CacheFileUpdater {
             ps.println(group.encode());
         }
 
-        System.out.println("Finished Writing to File, Exiting (" + (System.currentTimeMillis() - pre) + ")");
+        System.out.println("Finished Writing to File (" + (System.currentTimeMillis() - pre) + ")\nFiltering Items");
 
         ps.close();
 
+        List<Integer> found_items = new ArrayList<>();
+        
+        for(ItemGroup group : groups){
+            found_items.addAll(group.items);
+        }
+        
+        int[] items = found_items.stream().mapToInt(i -> i).toArray();
+        Arrays.sort(items);
+        
+        File filtered = new File("typeids_filter.txt");
+        
+        filtered.createNewFile();
+        
+        PrintStream f_ps = new PrintStream(new FileOutputStream(filtered));
+        
+        Scanner scanner = new Scanner("typeid.txt");
+        
+        while(scanner.hasNextLine()){
+            
+            String line = scanner.nextLine();
+            
+            String id = line.split("\t")[0];
+            
+            if(Arrays.binarySearch(items, Integer.valueOf(id)) != -1){
+                f_ps.println(line);
+            }
+            
+        }
+        
     }
 
 }

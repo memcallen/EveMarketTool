@@ -12,11 +12,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Paths;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Vector;
@@ -32,7 +29,6 @@ import org.luaj.vm2.LuaValue;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
@@ -54,7 +50,7 @@ public class ConfigManager {
     public static String cfg_file = "markettool.cfg";
     public static String decoder_dir = "./decoders";
 
-    private static HashMap<String, String> values = new HashMap<>();
+    private static final HashMap<String, String> VALUES = new HashMap<>();
 
     public static Vector<XMLLuaConfig> query_parsers = new Vector();
     public static Vector<XMLLuaConfig> table_generators = new Vector();
@@ -273,18 +269,11 @@ public class ConfigManager {
 
     private static void loadFile() throws IOException {
 
-        BufferedReader reader = null;
-
-        try {
-            reader = new BufferedReader(new FileReader(cfg_file));
+        try (BufferedReader reader = new BufferedReader(new FileReader(cfg_file))) {
 
             reader.lines().map(ConfigManager::stoe)
-                    .forEach(e -> values.put(e.getKey(), e.getValue()));
+                    .forEach(e -> VALUES.put(e.getKey(), e.getValue()));
 
-        } finally {
-            if (reader != null) {
-                reader.close();
-            }
         }
     }
 
@@ -319,7 +308,7 @@ public class ConfigManager {
     public static void save() {
         try {
             try (PrintStream out = new PrintStream(new FileOutputStream(cfg_file))) {
-                values.entrySet().forEach((e) -> {
+                VALUES.entrySet().forEach((e) -> {
                     out.print(e.getKey() + "=" + e.getValue());
                 });
             }
@@ -329,19 +318,19 @@ public class ConfigManager {
     }
 
     public static void clear() {
-        values.clear();
+        VALUES.clear();
     }
 
     public static boolean has(String key) {
-        return values.containsKey(key);
+        return VALUES.containsKey(key);
     }
 
     public static String get(String key) {
-        return values.containsKey(key) ? values.get(key) : "";
+        return VALUES.containsKey(key) ? VALUES.get(key) : "";
     }
 
     public static void set(String key, String value) {
-        values.put(key, value);
+        VALUES.put(key, value);
     }
 
 }

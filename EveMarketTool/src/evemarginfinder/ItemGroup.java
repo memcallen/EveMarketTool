@@ -10,6 +10,8 @@ import java.util.stream.Stream;
  */
 public class ItemGroup {
 
+    //The format for groups.txt is id/parent/name/desc/child groups/child items, tab separated
+    
     public int parent = -1;
     public int id = -1;
     public List<Integer> children = new ArrayList<>();
@@ -34,10 +36,7 @@ public class ItemGroup {
             return false;
         }
         final ItemGroup other = (ItemGroup) obj;
-        if (this.id != other.id) {
-            return false;
-        }
-        return true;
+        return this.id == other.id;
     }
 
     public static ItemGroup decode(String line) {

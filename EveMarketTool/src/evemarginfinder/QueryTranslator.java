@@ -8,17 +8,13 @@ package evemarginfinder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import javax.swing.JOptionPane;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.Varargs;
 import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.ZeroArgFunction;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;
@@ -93,10 +89,10 @@ public class QueryTranslator {
     public static LuaValue root = null;
     public static getTypes typeFunc = new getTypes();
 
-    public final static JsonParser parser = new JsonParser();
+    public final static JsonParser PARSER = new JsonParser();
 
     public static TranslatedQuery[][] translate(int[] itemids, String response) {
-        return translate(itemids, parser.parse(response));
+        return translate(itemids, PARSER.parse(response));
     }
 
     public static List<Vector> getTableData(TranslatedQuery[][] queries) {
@@ -114,9 +110,6 @@ public class QueryTranslator {
 
             LuaTable vals = ret.checktable();
 
-            System.out.println(vals.length());
-            System.out.println(ConfigManager.table_classes.length);
-            
             if (vals.length() != ConfigManager.table_classes.length) {
                 throw new LuaError("Error: Table Translator returned different length from getColumnTypes");
             }
@@ -192,6 +185,9 @@ public class QueryTranslator {
         root.set(LuaValue.valueOf("getItemName"), CoerceJavaToLua.coerce(new OneArgFunction() {
             @Override
             public LuaValue call(LuaValue arg) {
+                if(!arg.isint()){
+                    throw new LuaError("Error: invalid parameter type for getItemName, should be int");
+                }
                 return LuaValue.valueOf(DatabaseManager.queryItemName(arg.checkint()));
             }
         }));
