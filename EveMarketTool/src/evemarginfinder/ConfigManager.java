@@ -48,7 +48,7 @@ public class ConfigManager {
     }
 
     public static String cfg_file = "markettool.cfg";
-    public static String decoder_dir = "./decoders";
+    public static String decoder_dir = "decoders/";
 
     private static final HashMap<String, String> VALUES = new HashMap<>();
 
@@ -191,14 +191,14 @@ public class ConfigManager {
         }
 
         if (query_parsers.size() > 0) {
-            set("query-file", decoder_dir + "/" + query_parsers.get(0).file);
+            set("query-file", decoder_dir + query_parsers.get(0).file);
         } else {
             JOptionPane.showMessageDialog(null, "Error: No query parsers found", "Error", JOptionPane.ERROR_MESSAGE);
             throw new Error("Error: no query parsers found");
         }
 
         if (table_generators.size() > 0) {
-            set("query-table", decoder_dir + "/" + table_generators.get(0).file);
+            set("query-table", decoder_dir + table_generators.get(0).file);
         } else {
             JOptionPane.showMessageDialog(null, "Error: No table generators found", "Error", JOptionPane.ERROR_MESSAGE);
             throw new Error("Error: no table generators found");
@@ -213,7 +213,7 @@ public class ConfigManager {
         
         Objects.requireNonNull(xml);
         
-        set("query-table", xml.file);
+        set("query-table", decoder_dir + xml.file);
         
         QueryTranslator.init();
     }
@@ -225,7 +225,7 @@ public class ConfigManager {
         
         Objects.requireNonNull(xml);
         
-        set("query-parser", xml.file);
+        set("query-parser", decoder_dir + xml.file);
         
         QueryTranslator.init();
     }
