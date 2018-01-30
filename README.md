@@ -1,31 +1,91 @@
 # EveMarketTool
 
-This is a tool to find items to sell, by system.
+EveMarketTool is an application to bulk-price check items, which can be specified individually or by group, for the game Eve Online.
 
-How to run and download:
+# Installation
+EveMarketTool does not need to be installed. The only setup required is downloading the zip file from [releases](https://github.com/memcallen/EveMarketTool/releases) and unzipping the file.
 
-1. Go to 'Clone/Download'
-2. Download the zip
-3. Unzip the files
-4. Run 'EveMarketTool(.jar)' in the folder 'Eve Market Tool Compiled' OR compile from source (It's a netbeans project)
-5. If you compiled from source, be sure to include 'groups.txt', 'systems.txt', and 'typeid.txt' in the same folder as the jar as well as the library folder
+# Hardware requirements
+EveMarketTool will run on almost all machines. Recommended minimum ram is 4 Gigabytes. EveMarketTool should run on all CPUs that can run Java 1.8.
 
-Usage:
+# Usage
 
-1. Once the program has loaded, select item groups in the left side (same names as in the market) and/or select individual items on the right. (Hovering over the items or item groups will display the ID)
-2. After you've selected the items you want, go to the 'Info' tab
-3. All the selected items should appear on the left side, if they don't press the Refresh button. (If it still doesn't send me an eve-mail @ Memcallen Kahoudi)
-4. Enter the system name OR id in the 'system' box (defaults to Jita)
-5. Press load. Requests with more than 50 items will take a while, don't keep pressing the button
+The first tab indicates the items you would like to query
+ - Select item groups with the left panel
+ - Select idividual items with the right panel
+ - Both panels support searching, via the text input above both panels (Press enter to loop through all that match)
 
-IMPORTANT: The 'Profit' column does not indicate actual profits, it's better used as an 'item popularity' column as the volume is the number of items on the market currently, not the amount sold.
+The second tab is where the queries are displayed
+ - The left panel is where the items to be queried are displayed
+   - Currently, the panel is display only and you cannot modify the items through it
+ - The filters are currently not working, but I will most likely add a section to the table-generator lua file for it
+ - Press load to query the items
+   - This takes a few seconds, don't press the button multiple times
+   - For queries less than 50 items, it will take approximately 5 seconds, but increases rapidly after 100 items
+ - The table can be sorted by clicking on the column headers
 
-The Filter System:
-- You can sort the columns in the table by pressing the labels at the top. You can also resize the columns incase the names/numbers are blocked
-- The Min Margin and Maximum Cost will only work when 'Use Filter' is selected
+The third tab is for configuring the api website and formatting for the url
+ - If you are only using this tool to get item prices, this tab should be ignored
+ - The current config uses market.fuzzworks.co.uk to query items
+ - See the Configuration section for more details on how to configure the url
 
-- Min Margin: Filters the minimum margin for an item. Example: item x costs 100 isk in buy orders, and 110 isk in sell orders, the margin is 0.1 (or 10%)
+# API URL Configuration
 
-- Maximum Cost: Filters by the maximum cost for an item, goes by the sell orders in the market
+This section is only relevant if fuzzworks has stopped its service, or if you want to configure EveMarketTool to use another api. It is based off of the Python method for string formatting
 
-- Remove Invalids: When checked, this item will remove items with invalid entries. An invalid entry is one that usually doesn't have enough items being sold to have proper buy and sell numbers.
+URL Format
+ - {0} is the root url (Specified by the URL field)
+ - {1} is the typeid section (Generated via the TypeID section)
+ - {2} is the region or station format (Specified via the Region & Station fields)
+
+TypeID Format
+ - The first field is the root for the TypeID string
+ - The second string specifies the format for each typeid - This is repeated for each typeid
+
+Region & Station Format
+ - These fields are used with the Station/Region field in the Info tab
+   - Currently, this functionality is hardcoded to use the station field
+
+# LUA API
+
+This section specifies the defined methods and default APIs available to the lua script files
+EveMarketTool uses LuaJ to parse and run the lua scripts. Currently, the default APIs are based off of LuaJ's JsePlatform.standardGlobals, but this will most likely change due to security reasons.
+
+Default APIs:
+ - JseBase
+ - Package
+ - Bit32
+ - Table
+ - String
+ - Coroutine
+ - JseMath 
+ - JseIo
+ - JseOs
+ - JseJava
+ - LuaJava
+
+Custom Methods:
+
+Table<Integer> getTypes()
+ - Returns the current query's typeids as a table
+
+String getItemName(Integer typeid)
+ - Returns the Item Name from its typeid
+
+Table translate(Userdata json)
+ - The json parameter is the root element from the actual response, see [Gson @ JsonElement](https://github.com/google/gson/blob/master/gson/src/main/java/com/google/gson/JsonElement.java) for its methods
+  - Returns a zero-indexed array with buy at 0 and sell at 1
+    - Each item entry is a table of the format \[ID(int),Volume(int), Minimum Price(Double), Maximum Price(Double), TopFiveAvg(Double)\]
+    - TopFiveAvg is the average of the 'best' five percent of orders (ie lowest for buy, highest for sell)
+    - If your web api doesn't have a top five percent field, use the appropriate value or write a table generator
+
+Table<String> getColumnTypes()
+  - Specifies the java classes for each of the columns, java.lang.Object should work for odd object types (Do not leave any empty)
+
+Table<String> getColumnNames()
+  - Specifies the column header names
+
+Table translateTable(buy object, sell object)
+ - Translates a set of buy and sell objects into a row for the table
+ - buy and sell are the same format that was returned from translate
+ - Returns a table which contains the data for each of the table headers
