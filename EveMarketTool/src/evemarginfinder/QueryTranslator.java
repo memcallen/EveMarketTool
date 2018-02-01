@@ -27,44 +27,6 @@ import org.luaj.vm2.lib.jse.JsePlatform;
  */
 public class QueryTranslator {
 
-    public static class TranslatedQuery {
-
-        public TranslatedQuery(int type, int volume, double min, double max, double topFive) {
-            this.type = type;
-            this.volume = volume;
-            this.min = min;
-            this.max = max;
-            this.topFive = topFive;
-        }
-
-        public int type = 0,
-                volume = 0;
-        public double max = 0,
-                min = 0,
-                topFive = 0;
-
-        public void setType(int type) {
-            this.type = type;
-        }
-
-        public void setVolume(int volume) {
-            this.volume = volume;
-        }
-
-        public void setMin(double min) {
-            this.min = min;
-        }
-
-        public void setMax(double max) {
-            this.max = max;
-        }
-
-        public void setTopFive(double topFive) {
-            this.topFive = topFive;
-        }
-
-    }
-
     public static class getTypes extends ZeroArgFunction {
 
         public int[] types;
@@ -91,21 +53,18 @@ public class QueryTranslator {
 
     public final static JsonParser PARSER = new JsonParser();
 
-    public static TranslatedQuery[][] translate(int[] itemids, String response) {
-        return translate(itemids, PARSER.parse(response));
-    }
-
-    public static List<Vector> getTableData(TranslatedQuery[][] queries) {
+    public static List<Vector> getTableData(LuaValue queries_ret) {
 
         List<Vector> out = new ArrayList<>();
 
-        for (int i = 0; i < queries[0].length; i++) {
-            LuaValue ret = root.get("translateTable").call(
-                    CoerceJavaToLua.coerce(queries[0][i]),
-                    CoerceJavaToLua.coerce(queries[1][i]));
+        LuaValue buy = queries_ret.get(1);
+        LuaValue sell = queries_ret.get(2);
+        
+        for (int i = 1; i <= buy.length(); i++) {
+            LuaValue ret = root.get("translateTable").call(buy.get(i), sell.get(i));
 
             if (!ret.istable()) {
-                throw new LuaError("Error: Table Translator returned two types other than tables");
+                throw new LuaError("Error: Table Translator returned two non-tables");
             }
 
             LuaTable vals = ret.checktable();
@@ -116,9 +75,9 @@ public class QueryTranslator {
 
             Vector v = new Vector();
 
-            for (int index = 0; index < vals.length(); index++) {
+            for (int index = 1; index <= vals.length(); index++) {
 
-                Object obj = CoerceLuaToJava.coerce(vals.get(index + 1), ConfigManager.table_classes[index]);
+                Object obj = CoerceLuaToJava.coerce(vals.get(index), ConfigManager.table_classes[index - 1]);
 
                 v.add(obj);
 
@@ -132,45 +91,14 @@ public class QueryTranslator {
 
     }
 
-    public static TranslatedQuery[][] translate(int[] itemids, JsonElement response) {
+    public static LuaValue translate(int[] itemids, JsonElement response) {
 
         typeFunc.types = itemids;
 
         LuaValue ret = root.get("translate").call(
                 CoerceJavaToLua.coerce(response.getAsJsonObject()));
 
-        if (!ret.istable()) {
-            throw new LuaError("Error: Query Translation "
-                    + (ret == LuaValue.NIL ? "returned nil/no return" : "has incorrect return type"));
-        }
-
-        if (!ret.get(0).istable() || !ret.get(1).istable()) {
-            throw new LuaError("Error: Query Translator returned non-table for " + (ret.get(0).istable() ? "sell" : "buy"));
-        }
-
-        List<TranslatedQuery> buy = new ArrayList<>();
-        List<TranslatedQuery> sell = new ArrayList<>();
-
-        for (int i = 1; i <= ((LuaTable) ret.get(0)).length(); i++) {
-            LuaValue val = ((LuaTable) ret.get(0)).get(i);
-            buy.add(new TranslatedQuery(
-                    val.get("type").checkint(),
-                    val.get("volume").checkint(),
-                    val.get("min").checkdouble(),
-                    val.get("max").checkdouble(),
-                    val.get("topFive").checkdouble()
-            ));
-        }
-
-        for (int i = 1; i <= ((LuaTable) ret.get(1)).length(); i++) {
-            LuaValue val = ((LuaTable) ret.get(1)).get(i);
-            sell.add(new TranslatedQuery(val.get("type").checkint(), val.get("volume").checkint(),
-                    val.get("min").checkdouble(), val.get("max").checkdouble(), val.get("topFive").checkdouble()));
-        }
-
-        return new TranslatedQuery[][]{
-            buy.toArray(new TranslatedQuery[((LuaTable) ret).length()]),
-            sell.toArray(new TranslatedQuery[((LuaTable) ret).length()])};
+        return ret;
     }
 
     /**
