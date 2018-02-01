@@ -543,22 +543,16 @@ public final class MainFrame extends javax.swing.JFrame {
 
     private void deselectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deselectActionPerformed
 
-        for (int i = 0; i < ItemGroups_CheckBoxes.length; i++) {
-            JCheckBox box = ItemGroups_CheckBoxes[i];
-
+        for (JCheckBox box : ItemGroups_CheckBoxes) {
             if (box.isSelected()) {
                 box.setSelected(false);
             }
-
         }
 
-        for (int i = 0; i < Items_CheckBoxes.length; i++) {
-            JCheckBox box = Items_CheckBoxes[i];
-
+        for (JCheckBox box : Items_CheckBoxes) {
             if (box.isSelected()) {
                 box.setSelected(false);
             }
-
         }
 
     }//GEN-LAST:event_deselectActionPerformed
@@ -593,12 +587,10 @@ public final class MainFrame extends javax.swing.JFrame {
 
         model.clear();
 
-        for (int i = 0; i < Items_CheckBoxes.length; i++) {
-            JCheckBox box = Items_CheckBoxes[i];
+        for (JCheckBox box : Items_CheckBoxes) {
             if (box.isSelected()) {
                 model.addElement(box.getText());
             }
-
         }
 
         selected_items.repaint();
@@ -826,8 +818,7 @@ public final class MainFrame extends javax.swing.JFrame {
     }
 
     public void setSelectedGroup(int id, boolean selected) {
-        for (int i = 0; i < ItemGroups_CheckBoxes.length; i++) {
-            JCheckBox box = ItemGroups_CheckBoxes[i];
+        for (JCheckBox box : ItemGroups_CheckBoxes) {
             if (box.getToolTipText().equals(Integer.toString(id))) {
                 box.setSelected(selected);
                 return;
@@ -836,9 +827,7 @@ public final class MainFrame extends javax.swing.JFrame {
     }
 
     public void setSelectedItem(int id, boolean selected) {
-        for (int i = 0; i < Items_CheckBoxes.length; i++) {
-            JCheckBox box = Items_CheckBoxes[i];
-
+        for (JCheckBox box : Items_CheckBoxes) {
             if (box.getToolTipText().equals(Integer.toString(id))) {
                 box.setSelected(selected);
                 return;
