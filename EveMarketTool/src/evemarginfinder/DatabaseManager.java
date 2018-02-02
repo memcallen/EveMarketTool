@@ -2,7 +2,6 @@ package evemarginfinder;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import java.awt.EventQueue;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.BufferedReader;
@@ -18,7 +17,6 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,7 +55,7 @@ public class DatabaseManager {
 
     };
     //END LOG FILE STUFF
-    
+
     public static class CheckBoxListener implements ItemListener {
 
         private boolean isgroup = true;
@@ -131,17 +129,17 @@ public class DatabaseManager {
 
         String url = getQueryURL(itemid, sysid, true);
 
-        System.out.println("Querying " + url);
+        ConsoleFrame.log("Querying " + url);
 
         JsonElement response;
 
-        try{
+        try {
             response = read(url);
-        }catch(IOException e){
+        } catch (IOException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error Connecting to API", JOptionPane.ERROR_MESSAGE);
             return null;
         }
-        
+
         return QueryTranslator.getTableData(QueryTranslator.translate(itemid, response));
     }
 
@@ -187,7 +185,7 @@ public class DatabaseManager {
             }
         }
 
-        System.out.println("Loaded Systems in " + (System.currentTimeMillis() - pre) + " millis");
+        ConsoleFrame.log("Loaded Systems in " + (System.currentTimeMillis() - pre) + " millis");
 
     }
 
@@ -209,7 +207,7 @@ public class DatabaseManager {
 
         items = temp.toArray(new Entry[temp.size()]);
 
-        System.out.println("Loaded Items in " + (System.currentTimeMillis() - pre) + " millis");
+        ConsoleFrame.log("Loaded Items in " + (System.currentTimeMillis() - pre) + " millis");
     }
 
     public void init() throws FileNotFoundException {
@@ -228,7 +226,7 @@ public class DatabaseManager {
 
         groups = temp.toArray(new ItemGroup[temp.size()]);
 
-        System.out.println("Loaded Groups in " + (System.currentTimeMillis() - pre) + " millis");
+        ConsoleFrame.log("Loaded Groups in " + (System.currentTimeMillis() - pre) + " millis");
 
         //initilize front-end
         loadItems();
@@ -241,14 +239,12 @@ public class DatabaseManager {
             entries_groups[i] = new AbstractMap.SimpleEntry<>(group.id, group.name);
         }
 
-        EventQueue.invokeLater(() -> {
-            gui = new MainFrame(entries_groups, items);
+        gui = new MainFrame(entries_groups, items);
 
-            visual_selector_groups = i -> gui.setSelectedGroup(i, true);
-            visual_selector_items = i -> gui.setSelectedItem(i, true);
+        visual_selector_groups = i -> gui.setSelectedGroup(i, true);
+        visual_selector_items = i -> gui.setSelectedItem(i, true);
 
-            gui.setVisible(true);
-        });
+        gui.setVisible(true);
 
     }
 
@@ -323,15 +319,19 @@ public class DatabaseManager {
             }
         }
 
-        if (Arrays.asList(args).contains("--debug")) {
-            try {
-                log_stream = new FileOutputStream(LOGFILE);
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        try {
+            log_stream = new FileOutputStream(LOGFILE);
 
-            System.setOut(new PrintStream(log_stream));
+            System.setErr(new PrintStream(log_stream));
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        ConsoleFrame frame = new ConsoleFrame();
+
+        frame.init(new PrintStream(log_stream));
+
+        frame.setVisible(true);
 
         Thread t = new Thread(() -> {
 
@@ -343,7 +343,7 @@ public class DatabaseManager {
 
             DatabaseManager man = new DatabaseManager();
 
-            System.out.println("Initing stuff");
+            ConsoleFrame.log("Initing stuff");
 
             try {
                 man.init();
@@ -352,7 +352,9 @@ public class DatabaseManager {
                 return;
             }
 
-            System.out.println("Starting selector loop");
+            ConsoleFrame.log("Finished loading data, showing window");
+
+            ConsoleFrame.log("Starting selector loop");
 
             while (true) {
                 man.checkSelections();
