@@ -68,7 +68,7 @@ public class CacheFileRefresher {
             Logger.getLogger(CacheFileRefresher.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        System.out.println(data);
+        ConsoleFrame.log(data);
 
         JsonObject root = parser.parse(data)
                 .getAsJsonObject();
@@ -147,7 +147,7 @@ public class CacheFileRefresher {
      */
     public static void main(String[] args) throws FileNotFoundException, IOException {
 
-        System.out.println("Fix this first lol");
+        ConsoleFrame.log("Fix this first lol");
         System.exit(-1);
 
         CacheFileRefresher emf = new CacheFileRefresher();

@@ -87,7 +87,7 @@ public class CacheFileUpdater {
         for (int i = 0; i < groups.length; i++) {
             ItemGroup g = groups[i];
             if (i % (groups.length / 10) == 0) {
-                System.out.println("Working on Groups: " + (i * 100 / groups.length) + "%");
+                ConsoleFrame.log("Working on Groups: " + (i * 100 / groups.length) + "%");
             }
             Integer parentid = g.parent;
             if (parentid != -1) {
@@ -101,33 +101,32 @@ public class CacheFileUpdater {
 
     public static void main(String[] args) throws Exception {
 
-        System.out.println("Getting Group Ids");
+        ConsoleFrame.log("Getting Group Ids");
 
         long pre = System.currentTimeMillis();
 
         int[] groupids = getItemGroups();
 
-        System.out.println("Finished Getting Group Ids (" + (System.currentTimeMillis() - pre) + ")\nGetting Groups");
+        ConsoleFrame.log("Finished Getting Group Ids (" + (System.currentTimeMillis() - pre) + ")\nGetting Groups");
 
         ItemGroup[] groups = new ItemGroup[groupids.length];
 
         pre = System.currentTimeMillis();
 
         for (int i = 0; i < groupids.length; i++) {
-            System.out.println(i);
             if (i % (groupids.length / 10) == 0) {
-                System.out.println("Working on Groups: " + (i * 100d / groupids.length) + "%");
+                ConsoleFrame.log("Working on Groups: " + (i * 100d / groupids.length) + "%");
             }
             groups[i] = getItemGroup(groupids[i]);
         }
 
-        System.out.println("Finished Getting Groups (" + (System.currentTimeMillis() - pre) + ")\nResolving Children");
+        ConsoleFrame.log("Finished Getting Groups (" + (System.currentTimeMillis() - pre) + ")\nResolving Children");
 
         pre = System.currentTimeMillis();
 
         doParents(groups);
 
-        System.out.println("Finished Resolving Parents (" + (System.currentTimeMillis() - pre) + ")\nSaving to File");
+        ConsoleFrame.log("Finished Resolving Parents (" + (System.currentTimeMillis() - pre) + ")\nSaving to File");
 
         File out = new File("compiled");
 
@@ -141,7 +140,7 @@ public class CacheFileUpdater {
             ps.println(group.encode());
         }
 
-        System.out.println("Finished Writing to File (" + (System.currentTimeMillis() - pre) + ")\nFiltering Items");
+        ConsoleFrame.log("Finished Writing to File (" + (System.currentTimeMillis() - pre) + ")\nFiltering Items");
 
         ps.close();
 
