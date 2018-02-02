@@ -19,7 +19,7 @@ import javax.swing.text.StyledDocument;
 
 /**
  *
- * @author austin-z
+ * @author Memcallen Kahoudi/Recursive Pineapple
  */
 public class ConsoleFrame extends javax.swing.JFrame {
 

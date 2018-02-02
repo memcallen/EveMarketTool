@@ -32,24 +32,6 @@ import org.luaj.vm2.lib.jse.JsePlatform;
  */
 public class QueryTranslator {
 
-    private static class Pointer<T> {
-
-        private T t;
-
-        public Pointer(T t) {
-            this.t = t;
-        }
-
-        public T Get() {
-            return t;
-        }
-
-        public void Set(T t) {
-            this.t = t;
-        }
-
-    }
-
     public static class getTypes extends ZeroArgFunction {
 
         public int[] types;
@@ -76,21 +58,21 @@ public class QueryTranslator {
 
     public final static JsonParser PARSER = new JsonParser();
 
-    public final static HashMap<String, Color> color_names = new HashMap<>();
+    public final static HashMap<String, Color> COLORS = new HashMap<>();
 
-    private final static HashMap<String, Color> row_colors = new HashMap<>();
+    private final static HashMap<String, Color> ROW_COLORS = new HashMap<>();
 
     static {
 
-        color_names.put("none", null);
-        color_names.put(null, null);
+        COLORS.put("none", null);
+        COLORS.put(null, null);
 
         Field[] colors = Color.class.getFields();
 
         for (Field color : colors) {
             if (color.getType() == Color.class) {
                 try {
-                    color_names.put(color.getName(), (Color) color.get(null));
+                    COLORS.put(color.getName(), (Color) color.get(null));
                 } catch (IllegalArgumentException | IllegalAccessException ex) {
                     Logger.getLogger(QueryTranslator.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -103,13 +85,17 @@ public class QueryTranslator {
 
         if (ConfigManager.get("do-table-color").equals("true")) {
 
-            return row_colors.containsKey(data.get(row).get(0)) ? row_colors.get(data.get(row).get(0)) : null;
+            return ROW_COLORS.containsKey(data.get(row).get(0)) ? ROW_COLORS.get(data.get(row).get(0)) : null;
 
         }
 
         return null;
     }
 
+    public static void onNewQuery(){
+        ROW_COLORS.clear();
+    }
+    
     public static List<Vector> getTableData(LuaValue queries_ret) {
 
         List<Vector> out = new ArrayList<>();
@@ -120,18 +106,12 @@ public class QueryTranslator {
         for (int i = 1; i <= buy.length(); i++) {
 
             LuaValue ret;
-            Pointer<String> color = new Pointer<>(null);
-            Pointer<String> name = new Pointer<>(null);
+            HashMap<String, String> props = new HashMap<>();
 
             if (ConfigManager.get("do-table-color").equals("true")) {
 
-                LuaValue opts = new LuaTable();
-
-                opts.set(1, CoerceJavaToLua.coerce(color));
-                opts.set(2, CoerceJavaToLua.coerce(name));
-
                 ret = root.get("translateTableCol")
-                        .call(buy.get(i), sell.get(i), opts);
+                        .call(buy.get(i), sell.get(i), CoerceJavaToLua.coerce(props));
 
             } else {
                 ret = root.get("translateTable").call(buy.get(i), sell.get(i));
@@ -148,7 +128,7 @@ public class QueryTranslator {
             }
 
             if (ConfigManager.get("do-table-color").equals("true")) {
-                row_colors.put(name.Get(), color_names.get(color.Get()));
+                ROW_COLORS.put(props.get("name"), COLORS.get(props.get("color")));
             }
 
             Vector v = new Vector();

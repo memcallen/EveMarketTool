@@ -1,8 +1,6 @@
 package evemarginfinder;
 
 import evemarginfinder.DatabaseManager.CheckBoxListener;
-import java.awt.Color;
-import java.awt.Component;
 import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.Vector;
@@ -10,10 +8,7 @@ import java.util.stream.Stream;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -23,42 +18,6 @@ import javax.swing.table.TableRowSorter;
  * @author Memcallen Kahoudi/Recursive Pineapple
  */
 public final class MainFrame extends javax.swing.JFrame {
-
-    public class CustomCellRenderer extends DefaultTableCellRenderer {
-
-        public double min_margin, max_cost;
-        public boolean active = false;
-        public Color[] colors = {Color.RED, Color.GREEN};
-
-        public CustomCellRenderer(double min_margin, double max_cost) {
-            this.min_margin = min_margin;
-            this.max_cost = max_cost;
-        }
-
-        public void setActive(boolean active) {
-            this.active = active;
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table,
-                Object value, boolean isSelected, boolean hasFocus, int row,
-                int column) {
-
-            Component c = super.getTableCellRendererComponent(table,
-                    value, isSelected, hasFocus, row, column);
-
-            if (active) {
-                double margin = (Double) table.getValueAt(row, 1);
-                double cost = (Double) table.getValueAt(row, 2);
-
-                if (margin >= min_margin && cost <= max_cost) {
-                    c.setBackground(colors[0]);
-                }
-            }
-            return c;
-        }
-
-    }
 
     public Entry<Integer, String>[] ItemGroups = null;
     public Entry<Integer, String>[] Items = null;
@@ -627,6 +586,8 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         }
 
+        QueryTranslator.onNewQuery();
+        
         current_query = new Thread(() -> {
 
             output_table_data.clear();

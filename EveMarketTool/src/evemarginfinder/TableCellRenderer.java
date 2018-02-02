@@ -14,7 +14,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 /**
  *
- * @author austin-z
+ * @author Memcallen Kahoudi/Recursive Pineapple
  */
 public class TableCellRenderer extends DefaultTableCellRenderer {
 
