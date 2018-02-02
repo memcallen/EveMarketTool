@@ -80,7 +80,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
     public MainFrame(Entry<Integer, String>[] entries_groups, Entry<Integer, String>[] entries_items) {
 
-        System.out.println("Loading laf");
+        ConsoleFrame.log("Loading laf");
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -92,7 +92,7 @@ public final class MainFrame extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
 
-        System.out.println("Doing table stuff");
+        ConsoleFrame.log("Doing table stuff");
 
         table_model = new DefaultTableModel(output_table_data, ConfigManager.table_headers) {
 
@@ -103,7 +103,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         };
 
-        System.out.println("Initing components");
+        ConsoleFrame.log("Initing components");
         initComponents();
 
         TableRowSorter<TableModel> sorter = new TableRowSorter(output_table.getModel());
@@ -113,12 +113,12 @@ public final class MainFrame extends javax.swing.JFrame {
         ItemGroups = entries_groups;
         Items = entries_items;
 
-        System.out.println("Initing Check Boxes");
+        ConsoleFrame.log("Initing Check Boxes");
         initializeCheckBoxes();
 
-        System.out.println("Packing");
-        //pack();
-
+        ConsoleFrame.log("Packing");
+        pack();
+        
     }
 
     @SuppressWarnings("unchecked")
@@ -154,7 +154,7 @@ public final class MainFrame extends javax.swing.JFrame {
         jLabel8 = new javax.swing.JLabel();
         system_id = new javax.swing.JTextField();
         rem_inv = new javax.swing.JCheckBox();
-        jPanel1 = new javax.swing.JPanel();
+        SettingsPanel = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         cfg_format = new javax.swing.JTextField();
@@ -217,7 +217,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jLabel2.setFont(jLabel2.getFont());
         jLabel2.setText("Items");
-        SelectionPanel.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 10, 40, -1));
+        SelectionPanel.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 10, 40, -1));
 
         ItemGroupSearch.setFont(ItemGroupSearch.getFont());
         ItemGroupSearch.setText("Item Group Search");
@@ -237,7 +237,7 @@ public final class MainFrame extends javax.swing.JFrame {
                 ItemSearchKeyTyped(evt);
             }
         });
-        SelectionPanel.add(ItemSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 10, 120, -1));
+        SelectionPanel.add(ItemSearch, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 10, 120, -1));
 
         deselect.setFont(deselect.getFont());
         deselect.setText("Deselect All");
@@ -246,7 +246,7 @@ public final class MainFrame extends javax.swing.JFrame {
                 deselectActionPerformed(evt);
             }
         });
-        SelectionPanel.add(deselect, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 10, -1, -1));
+        SelectionPanel.add(deselect, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 10, -1, -1));
 
         TabbedPane.addTab("Select Groups", SelectionPanel);
 
@@ -293,6 +293,8 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         });
         InfoPanel.add(selected_items_refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 30, -1, -1));
+
+        jScrollPane1.setDoubleBuffered(true);
 
         jScrollPane1.setViewportView(output_table);
 
@@ -499,18 +501,18 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         });
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        javax.swing.GroupLayout SettingsPanelLayout = new javax.swing.GroupLayout(SettingsPanel);
+        SettingsPanel.setLayout(SettingsPanelLayout);
+        SettingsPanelLayout.setHorizontalGroup(
+            SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(SettingsPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(SettingsPanelLayout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SettingsPanelLayout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(cfg_reload)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -519,22 +521,22 @@ public final class MainFrame extends javax.swing.JFrame {
                         .addComponent(cfg_save)))
                 .addContainerGap())
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        SettingsPanelLayout.setVerticalGroup(
+            SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(SettingsPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 138, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cfg_save)
                     .addComponent(cfg_reset)
                     .addComponent(cfg_reload))
                 .addContainerGap())
         );
 
-        TabbedPane.addTab("Settings", jPanel1);
+        TabbedPane.addTab("Settings", SettingsPanel);
 
         getContentPane().add(TabbedPane);
 
@@ -635,19 +637,20 @@ public final class MainFrame extends javax.swing.JFrame {
                     .mapToInt(DatabaseManager::queryItemId)
                     .toArray();
 
-            int typesperquery = 20;
+            int numperquery = 20;
 
-            if (ids.length > typesperquery) {
+            if (ids.length > numperquery) {
 
                 int i = ids.length;
 
                 while (i > 0) {
 
-                    int[] subids = Arrays.copyOfRange(ids, Math.max(0, i - typesperquery), i);
+                    int[] subids = Arrays.copyOfRange(ids, Math.max(0, i - numperquery), i);
 
                     output_table_data.addAll(DatabaseManager.getMarketInfoBulk(subids, sysid));
 
-                    i -= typesperquery;
+                    i -= numperquery;
+                    
                 }
 
             } else {
@@ -660,6 +663,10 @@ public final class MainFrame extends javax.swing.JFrame {
 
             output_table.revalidate();
 
+            output_table.repaint();
+            
+            output_table.doLayout();
+            
             current_query.interrupt();
         });
 
@@ -837,7 +844,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
     public void initializeCheckBoxes() {
 
-        System.out.println("Checkboxes - Initing stuff");
+        ConsoleFrame.log("Checkboxes - Initing stuff");
 
         ItemGroupPanel.setLayout(ItemGroups_Layout);
         ItemPanel.setLayout(Items_Layout);
@@ -845,7 +852,7 @@ public final class MainFrame extends javax.swing.JFrame {
         CheckBoxListener group = new CheckBoxListener(true);
         CheckBoxListener item = new CheckBoxListener(false);
 
-        System.out.println("Checkboxes - Doing Groups");
+        ConsoleFrame.log("Checkboxes - Doing Groups");
 
         //Groups
         ItemGroups_CheckBoxes = new JCheckBox[ItemGroups.length];
@@ -867,14 +874,14 @@ public final class MainFrame extends javax.swing.JFrame {
             ItemGroupPanel.add(box);
 
             if (i % perc == 0) {
-                System.out.println("Checkboxes - Group:" + Math.round(i / perc * 100) / 100 * 5);
+                ConsoleFrame.log("Checkboxes - Group:" + Math.round(i / perc * 100) / 100 * 5);
             }
 
         }
 
-        System.out.println("Created Checkboxes:Groups in " + (System.currentTimeMillis() - pre) + " millis");
+        ConsoleFrame.log("Created Checkboxes:Groups in " + (System.currentTimeMillis() - pre) + " millis");
 
-        System.out.println("Checkboxes - Doing Items");
+        ConsoleFrame.log("Checkboxes - Doing Items");
         //Items
         Items_CheckBoxes = new JCheckBox[Items.length];
 
@@ -895,12 +902,12 @@ public final class MainFrame extends javax.swing.JFrame {
             ItemPanel.add(box);
 
             if (i % perc == 0) {
-                System.out.println("Checkboxes - Item:" + Math.round(i / perc * 100) / 100 * 5);
+                ConsoleFrame.log("Checkboxes - Item:" + Math.round(i / perc * 100) / 100 * 5);
             }
 
         }
 
-        System.out.println("Created Checkboxes:Items in " + (System.currentTimeMillis() - pre) + " millis");
+        ConsoleFrame.log("Created Checkboxes:Items in " + (System.currentTimeMillis() - pre) + " millis");
 
         refreshConfigVisuals();
 
@@ -915,6 +922,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JScrollPane ItemScroll;
     private javax.swing.JTextField ItemSearch;
     private javax.swing.JPanel SelectionPanel;
+    private javax.swing.JPanel SettingsPanel;
     private javax.swing.JTabbedPane TabbedPane;
     private javax.swing.JTextField cfg_format;
     private javax.swing.JTextField cfg_id;
@@ -941,7 +949,6 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
