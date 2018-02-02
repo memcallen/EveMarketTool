@@ -10,6 +10,7 @@
 		
 		<name>Generic Table</name>
 		<lua-file>fuzzworks_table.lua</lua-file>
+		<do-table-color>true</do-table-color>
 		
 	</table-generator>
 </config>

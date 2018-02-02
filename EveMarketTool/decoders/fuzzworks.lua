@@ -19,8 +19,6 @@ function translate(json)
 	for k, id in pairs(getTypes())
 	do
 		
-		print("doing type " .. id)
-		
 		el = json:get(tostring(id)):getAsJsonObject()
 		
 		table.insert(buy, convert(id, el:get("buy"):getAsJsonObject()))
@@ -28,6 +26,6 @@ function translate(json)
 		
 	end
 	
-	return {[0]=buy, [1]=sell}
+	return {buy, sell}
 	
 end
