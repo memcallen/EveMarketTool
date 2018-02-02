@@ -15,6 +15,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URL;
+import java.sql.Time;
+import java.time.Instant;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +40,7 @@ import javax.swing.JOptionPane;
 public class DatabaseManager {
 
     //LOG FILE STUFF
-    private static final File LOGFILE = new File("LOG-" + System.currentTimeMillis());
+    private static final File LOGFILE = new File("LOG-" + Time.from(Instant.now()));
     private static OutputStream log_stream = null;
 
     private static final OutputStream CONSOLE_STREAM = new OutputStream() {

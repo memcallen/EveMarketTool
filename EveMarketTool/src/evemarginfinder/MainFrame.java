@@ -176,6 +176,7 @@ public final class MainFrame extends javax.swing.JFrame {
         parse_table = new javax.swing.JComboBox<>();
         parse_reload = new javax.swing.JButton();
         cfg_reload = new javax.swing.JButton();
+        cfg_write = new javax.swing.JButton();
 
         jCheckBox2.setText("jCheckBox2");
 
@@ -472,7 +473,7 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(parse_decoder, 0, 148, Short.MAX_VALUE)
                     .addComponent(parse_table, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(64, Short.MAX_VALUE))
+                .addContainerGap(95, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(parse_reload)
@@ -501,6 +502,13 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        cfg_write.setText("Write To File");
+        cfg_write.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cfg_writeActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout SettingsPanelLayout = new javax.swing.GroupLayout(SettingsPanel);
         SettingsPanel.setLayout(SettingsPanelLayout);
         SettingsPanelLayout.setHorizontalGroup(
@@ -514,10 +522,12 @@ public final class MainFrame extends javax.swing.JFrame {
                         .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SettingsPanelLayout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(cfg_reload)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(cfg_reset)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cfg_reload)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cfg_write)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cfg_save)))
                 .addContainerGap())
         );
@@ -528,11 +538,12 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addGroup(SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 138, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 148, Short.MAX_VALUE)
                 .addGroup(SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cfg_save)
-                    .addComponent(cfg_reset)
-                    .addComponent(cfg_reload))
+                    .addComponent(cfg_reload)
+                    .addComponent(cfg_write)
+                    .addComponent(cfg_reset))
                 .addContainerGap())
         );
 
@@ -803,6 +814,13 @@ public final class MainFrame extends javax.swing.JFrame {
         
     }//GEN-LAST:event_parse_tableActionPerformed
 
+    private void cfg_writeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_writeActionPerformed
+        
+        this.cfg_saveActionPerformed(null);
+        
+        ConfigManager.save();
+    }//GEN-LAST:event_cfg_writeActionPerformed
+
     public void refreshConfigVisuals() {
         cfg_format.setText(ConfigManager.get("uformat"));
         cfg_url.setText(ConfigManager.get("url"));
@@ -933,6 +951,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton cfg_save;
     private javax.swing.JTextField cfg_stat;
     private javax.swing.JTextField cfg_url;
+    private javax.swing.JButton cfg_write;
     private javax.swing.JButton deselect;
     private javax.swing.JButton jButton1;
     private javax.swing.JCheckBox jCheckBox2;

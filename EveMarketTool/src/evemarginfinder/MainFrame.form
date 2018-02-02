@@ -446,10 +446,12 @@
                           </Group>
                           <Group type="102" alignment="1" attributes="0">
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                              <Component id="cfg_reload" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="cfg_reset" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="cfg_reload" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="cfg_write" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                               <Component id="cfg_save" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
@@ -465,11 +467,12 @@
                           <Component id="jPanel3" max="32767" attributes="0"/>
                           <Component id="jPanel2" max="32767" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="138" max="32767" attributes="0"/>
+                      <EmptySpace pref="148" max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="cfg_save" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="cfg_reset" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="cfg_reload" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="cfg_write" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="cfg_reset" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
@@ -661,7 +664,7 @@
                               <Component id="parse_decoder" pref="148" max="32767" attributes="0"/>
                               <Component id="parse_table" max="32767" attributes="0"/>
                           </Group>
-                          <EmptySpace pref="64" max="32767" attributes="0"/>
+                          <EmptySpace pref="95" max="32767" attributes="0"/>
                       </Group>
                       <Group type="102" alignment="1" attributes="0">
                           <EmptySpace max="32767" attributes="0"/>
@@ -747,6 +750,14 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cfg_reloadActionPerformed"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JButton" name="cfg_write">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Write To File"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cfg_writeActionPerformed"/>
               </Events>
             </Component>
           </SubComponents>

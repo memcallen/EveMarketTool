@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -60,12 +61,13 @@ public class ConfigManager {
     public static Vector<String> table_headers = new Vector();
 
     private static Entry<String, String> stoe(String in) {
-        if (in.matches("\\w+\\=\\w+")) {
-            String[] split = in.split("=");
-            return new SimpleEntry(split[0], split[1]);
-        } else {
-            return null;
+        int i_eq = in.indexOf("=");
+        if(i_eq > 0){
+            if(in.charAt(i_eq - 1) != '\\'){
+                return new SimpleEntry(in.substring(0, i_eq), in.substring(i_eq + 1));
+            }
         }
+        return null;
     }
 
     private static void checkFiles() throws IOException {
@@ -269,11 +271,20 @@ public class ConfigManager {
 
     private static void loadFile() throws IOException {
 
+        ConsoleFrame.log("Loading " + cfg_file);
         try (BufferedReader reader = new BufferedReader(new FileReader(cfg_file))) {
 
-            reader.lines().map(ConfigManager::stoe)
+            System.out.println(reader);
+            
+            reader.lines().peek(System.out::println).map(ConfigManager::stoe)
                     .forEach(e -> VALUES.put(e.getKey(), e.getValue()));
 
+        }catch(Exception e){
+            ConsoleFrame.log_error("Invalid " + cfg_file + ", skipping config reading (" + e.toString() + ")");
+            e.printStackTrace();
+            if(e instanceof IOException){
+                throw e;
+            }
         }
     }
 
@@ -309,7 +320,7 @@ public class ConfigManager {
         try {
             try (PrintStream out = new PrintStream(new FileOutputStream(cfg_file))) {
                 VALUES.entrySet().forEach((e) -> {
-                    out.print(e.getKey() + "=" + e.getValue());
+                    out.println(e.getKey() + "=" + e.getValue());
                 });
             }
         } catch (FileNotFoundException ex) {
