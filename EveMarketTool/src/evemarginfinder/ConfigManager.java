@@ -19,7 +19,6 @@ import java.util.Objects;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -30,6 +29,7 @@ import org.luaj.vm2.LuaValue;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
@@ -41,10 +41,12 @@ public class ConfigManager {
     public static class XMLLuaConfig {
 
         public final String name, file;
-
-        public XMLLuaConfig(String name, String file) {
+        public boolean do_t_color = false;
+        
+        public XMLLuaConfig(String name, String file, boolean do_color) {
             this.name = name;
             this.file = file;
+            this.do_t_color = do_color;
         }
     }
 
@@ -131,10 +133,14 @@ public class ConfigManager {
 
             String name = "";
             String file = "";
-
+            boolean do_color = false;
             try {
                 name = el.getElementsByTagName("name").item(0).getTextContent();
                 file = el.getElementsByTagName("lua-file").item(0).getTextContent();
+                NodeList list = el.getElementsByTagName("do-table-color");
+                if(list.getLength() > 0){
+                    do_color = Boolean.valueOf(list.item(0).getTextContent());
+                }
             } catch (NullPointerException e) {
                 throw new SAXException(
                         String.format("Error: file %s has malformed tag %s - missing name or lua-file", xml_file.getName(), tag));
@@ -142,10 +148,10 @@ public class ConfigManager {
 
             switch (tag) {
                 case "query-parser":
-                    queries.add(new XMLLuaConfig(name, file));
+                    queries.add(new XMLLuaConfig(name, file, false));
                     break;
                 case "table-generator":
-                    tables.add(new XMLLuaConfig(name, file));
+                    tables.add(new XMLLuaConfig(name, file, do_color));
                     break;
                 default:
                     System.err.println("Found an incorrect tag in parser file " + file + " (" + tag + ")");
@@ -216,6 +222,7 @@ public class ConfigManager {
         Objects.requireNonNull(xml);
         
         set("query-table", decoder_dir + xml.file);
+        set("do-table-color", xml.do_t_color + "");
         
         QueryTranslator.init();
     }
@@ -248,7 +255,6 @@ public class ConfigManager {
             try {
                 table_classes[i] = Class.forName(classes.get(i + 1).tojstring());
             } catch (ClassNotFoundException ex) {
-                ex.printStackTrace();
                 throw new LuaError(String.format("Error: getColumnTypes returned invalid java class %s for type table", classes.get(i).tojstring()));
             }
         }
@@ -281,7 +287,6 @@ public class ConfigManager {
 
         }catch(Exception e){
             ConsoleFrame.log_error("Invalid " + cfg_file + ", skipping config reading (" + e.toString() + ")");
-            e.printStackTrace();
             if(e instanceof IOException){
                 throw e;
             }

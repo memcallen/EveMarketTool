@@ -13,6 +13,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
@@ -67,9 +69,10 @@ public final class MainFrame extends javax.swing.JFrame {
     public java.awt.GridLayout Items_Layout = new java.awt.GridLayout(0, 1);
     public DefaultListModel model = new DefaultListModel();
     public DefaultTableModel table_model;
-    public CustomCellRenderer cell = new CustomCellRenderer(0.1, 10000000);
+    
+    public final Vector<Vector> output_table_data = new Vector();
+    public TableCellRenderer cell = new TableCellRenderer(output_table_data);
 
-    public Vector<Vector> output_table_data = new Vector();
 
     public int group_search_index = 0;
     public int item_search_index = 0;
@@ -106,6 +109,12 @@ public final class MainFrame extends javax.swing.JFrame {
         ConsoleFrame.log("Initing components");
         initComponents();
 
+        TableColumnModel tcm = output_table.getColumnModel();
+        
+        for(int i = 0; i < tcm.getColumnCount(); i++){
+            tcm.getColumn(i).setCellRenderer(cell);
+        }
+        
         TableRowSorter<TableModel> sorter = new TableRowSorter(output_table.getModel());
 
         output_table.setRowSorter(sorter);
@@ -620,23 +629,6 @@ public final class MainFrame extends javax.swing.JFrame {
 
         current_query = new Thread(() -> {
 
-            double min_margin = 0.1;
-            try {
-                min_margin = Double.valueOf(min_margin_field.getText());
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Error: Min Margin (" + min_margin_field.getText() + ") needs to be a number");
-            }
-
-            double max_cost = 10000000;
-            try {
-                max_cost = Double.valueOf(max_cost_field.getText());
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Error: Max Cost (" + max_cost_field.getText() + ") needs to be a number");
-            }
-
-            cell.min_margin = min_margin;
-            cell.max_cost = max_cost;
-
             output_table_data.clear();
 
             output_table_data.setSize(0);
@@ -708,7 +700,8 @@ public final class MainFrame extends javax.swing.JFrame {
 
     private void use_filterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_use_filterActionPerformed
 
-        cell.setActive(use_filter.isSelected());
+        //TODO replace this
+        //cell.setActive(use_filter.isSelected());
 
         output_table.revalidate();
 

@@ -7,9 +7,14 @@ package evemarginfinder;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import java.awt.Color;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import javax.swing.JOptionPane;
 import org.luaj.vm2.LuaError;
@@ -26,6 +31,24 @@ import org.luaj.vm2.lib.jse.JsePlatform;
  * @author Memcallen Kahoudi/Recursive Pineapple
  */
 public class QueryTranslator {
+
+    private static class Pointer<T> {
+
+        private T t;
+
+        public Pointer(T t) {
+            this.t = t;
+        }
+
+        public T Get() {
+            return t;
+        }
+
+        public void Set(T t) {
+            this.t = t;
+        }
+
+    }
 
     public static class getTypes extends ZeroArgFunction {
 
@@ -53,24 +76,79 @@ public class QueryTranslator {
 
     public final static JsonParser PARSER = new JsonParser();
 
+    public final static HashMap<String, Color> color_names = new HashMap<>();
+
+    private final static HashMap<String, Color> row_colors = new HashMap<>();
+
+    static {
+
+        color_names.put("none", null);
+        color_names.put(null, null);
+
+        Field[] colors = Color.class.getFields();
+
+        for (Field color : colors) {
+            if (color.getType() == Color.class) {
+                try {
+                    color_names.put(color.getName(), (Color) color.get(null));
+                } catch (IllegalArgumentException | IllegalAccessException ex) {
+                    Logger.getLogger(QueryTranslator.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+
+    }
+
+    public static Color getCellColors(int row, int column, List<Vector> data) {
+
+        if (ConfigManager.get("do-table-color").equals("true")) {
+
+            return row_colors.containsKey(data.get(row).get(0)) ? row_colors.get(data.get(row).get(0)) : null;
+
+        }
+
+        return null;
+    }
+
     public static List<Vector> getTableData(LuaValue queries_ret) {
 
         List<Vector> out = new ArrayList<>();
 
         LuaValue buy = queries_ret.get(1);
         LuaValue sell = queries_ret.get(2);
-        
+
         for (int i = 1; i <= buy.length(); i++) {
-            LuaValue ret = root.get("translateTable").call(buy.get(i), sell.get(i));
+
+            LuaValue ret;
+            Pointer<String> color = new Pointer<>(null);
+            Pointer<String> name = new Pointer<>(null);
+
+            if (ConfigManager.get("do-table-color").equals("true")) {
+
+                LuaValue opts = new LuaTable();
+
+                opts.set(1, CoerceJavaToLua.coerce(color));
+                opts.set(2, CoerceJavaToLua.coerce(name));
+
+                ret = root.get("translateTableCol")
+                        .call(buy.get(i), sell.get(i), opts);
+
+            } else {
+                ret = root.get("translateTable").call(buy.get(i), sell.get(i));
+            }
 
             if (!ret.istable()) {
-                throw new LuaError("Error: Table Translator returned two non-tables");
+                throw new LuaError("Error: Table Translator returned a non-table");
             }
 
             LuaTable vals = ret.checktable();
 
             if (vals.length() != ConfigManager.table_classes.length) {
                 throw new LuaError("Error: Table Translator returned different length from getColumnTypes");
+            }
+
+            if (ConfigManager.get("do-table-color").equals("true")) {
+                row_colors.put(name.Get(), color_names.get(color.Get()));
             }
 
             Vector v = new Vector();
@@ -113,10 +191,18 @@ public class QueryTranslator {
         root.set(LuaValue.valueOf("getItemName"), CoerceJavaToLua.coerce(new OneArgFunction() {
             @Override
             public LuaValue call(LuaValue arg) {
-                if(!arg.isint()){
+                if (!arg.isint()) {
                     throw new LuaError("Error: invalid parameter type for getItemName, should be int");
                 }
                 return LuaValue.valueOf(DatabaseManager.queryItemName(arg.checkint()));
+            }
+        }));
+
+        root.set(LuaValue.valueOf("log"), CoerceJavaToLua.coerce(new OneArgFunction() {
+            @Override
+            public LuaValue call(LuaValue arg) {
+                ConsoleFrame.log(arg.tojstring());
+                return LuaValue.NIL;
             }
         }));
 
@@ -133,7 +219,7 @@ public class QueryTranslator {
             JOptionPane.showMessageDialog(null, ConfigManager.get("query-table") + ": " + e.getMessage(), "Error loading table generator", JOptionPane.ERROR_MESSAGE);
             throw e;
         }
-        
+
     }
 
 }
