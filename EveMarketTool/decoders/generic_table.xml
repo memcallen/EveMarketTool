@@ -1,0 +1,10 @@
+<config>
+	
+	<table-generator>
+		
+		<name>Generic Table</name>
+		<lua-file>generic_table.lua</lua-file>
+		<do-table-color>false</do-table-color>
+		
+	</table-generator>
+</config>

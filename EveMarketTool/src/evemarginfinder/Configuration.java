@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author austin-z
+ * @author Memcallen Kahoudi/Recursive Pineapple
  */
 public class Configuration {
 
