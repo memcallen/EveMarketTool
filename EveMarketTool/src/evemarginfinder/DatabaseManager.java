@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Time;
 import java.time.Instant;
@@ -101,7 +102,7 @@ public class DatabaseManager {
     public MainFrame gui = null;
 
     public static Entry<Integer, String>[] items; //I should've used a map but oh well
-    public static HashMap<Integer, String> systems = new HashMap<>();
+    public static HashMap<String, Integer> systems = new HashMap<>();
     public static String itemgroupFile = "groups.txt";
     public static String itemFile = "typeid.txt";
     public static String systemFile = "systems.txt";
@@ -112,24 +113,24 @@ public class DatabaseManager {
     public static JsonParser parser = new JsonParser();
 
     public static String getQueryURL(int[] itemids, int loc, boolean stat) {
-        String out = ConfigManager.get("uformat");
+        String out = Configuration.get("uformat");
 
-        out = out.replace("{0}", ConfigManager.get("url"));
+        out = out.replace("{0}", Configuration.get("url"));
 
-        String typef = ConfigManager.get("type");
+        String typef = Configuration.get("type");
 
-        String types = ConfigManager.get("typeroot").replace("{0}",
+        String types = Configuration.get("typeroot").replace("{0}",
                 IntStream.of(itemids).mapToObj(i -> typef.replace("{0}", Integer.toString(i))).reduce("", String::concat)
         );
 
-        String location = ConfigManager.get(stat ? "station" : "region").replace("{0}", Integer.toString(loc));
+        String location = Configuration.get(stat ? "station" : "region").replace("{0}", Integer.toString(loc));
 
         return out.replace("{1}", types).replace("{2}", location);
     }
 
     public static List<Vector> getMarketInfoBulk(int[] itemid, int sysid) {
 
-        String url = getQueryURL(itemid, sysid, true);
+        String url = getQueryURL(itemid, sysid, false);
 
         ConsoleFrame.log("Querying " + url);
 
@@ -138,7 +139,9 @@ public class DatabaseManager {
         try {
             response = read(url);
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Error Connecting to API", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null,
+                    e.getMessage().length() > 100 ? e.getMessage().substring(0, 100) + "..." : e.getMessage(),
+                    "Error Connecting to API", JOptionPane.ERROR_MESSAGE);
             return null;
         }
 
@@ -146,7 +149,11 @@ public class DatabaseManager {
     }
 
     public static JsonElement read(String string) throws IOException {
-        return parser.parse(new BufferedReader(new InputStreamReader(new URL(string).openStream())));
+        HttpURLConnection conn = (HttpURLConnection) new URL(string).openConnection();
+        conn.addRequestProperty("User-Agent", "Mozilla/4.0");
+        JsonElement ret = parser.parse(new BufferedReader(new InputStreamReader(conn.getInputStream())));
+        conn.disconnect();
+        return ret;
     }
 
     public static int queryItemId(String name) {
@@ -172,6 +179,19 @@ public class DatabaseManager {
 
     }
 
+    public static int querySystemId(String name) {
+        return systems.containsKey(name) ? systems.get(name) : -1;
+    }
+
+    public static String querySystemName(int id) {
+        for (Entry<String, Integer> e : systems.entrySet()) {
+            if (e.getValue() == id) {
+                return e.getKey();
+            }
+        }
+        return null;
+    }
+
     public void loadSystems() throws FileNotFoundException {
 
         long pre = System.currentTimeMillis();
@@ -182,7 +202,7 @@ public class DatabaseManager {
             while (scanner.hasNextLine()) {
                 String[] line = scanner.nextLine().split("\t");
 
-                systems.put(Integer.valueOf(line[0]), line[2]);
+                systems.put(line[2], Integer.valueOf(line[0]));
 
             }
         }
@@ -212,7 +232,7 @@ public class DatabaseManager {
         ConsoleFrame.log("Loaded Items in " + (System.currentTimeMillis() - pre) + " millis");
     }
 
-    public void init() throws FileNotFoundException {
+    public void initialize() throws FileNotFoundException {
 
         long pre = System.currentTimeMillis();
 
@@ -337,18 +357,18 @@ public class DatabaseManager {
 
         Thread t = new Thread(() -> {
 
-            ConfigManager.load();
+            Configuration.initialize();
+            
+            QueryTranslator.initialize();
 
-            QueryTranslator.init();
-
-            ConfigManager.loadHeaders();
+            QueryTranslator.reset_lua();
 
             DatabaseManager man = new DatabaseManager();
 
             ConsoleFrame.log("Initing stuff");
 
             try {
-                man.init();
+                man.initialize();
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
                 return;

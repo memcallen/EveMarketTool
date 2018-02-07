@@ -1,13 +1,17 @@
 package evemarginfinder;
 
 import evemarginfinder.DatabaseManager.CheckBoxListener;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.stream.Stream;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -28,10 +32,9 @@ public final class MainFrame extends javax.swing.JFrame {
     public java.awt.GridLayout Items_Layout = new java.awt.GridLayout(0, 1);
     public DefaultListModel model = new DefaultListModel();
     public DefaultTableModel table_model;
-    
+
     public final Vector<Vector> output_table_data = new Vector();
     public TableCellRenderer cell = new TableCellRenderer(output_table_data);
-
 
     public int group_search_index = 0;
     public int item_search_index = 0;
@@ -56,11 +59,11 @@ public final class MainFrame extends javax.swing.JFrame {
 
         ConsoleFrame.log("Doing table stuff");
 
-        table_model = new DefaultTableModel(output_table_data, ConfigManager.table_headers) {
+        table_model = new DefaultTableModel(output_table_data, QueryTranslator.table_headers) {
 
             @Override
             public Class<?> getColumnClass(int column) {
-                return ConfigManager.table_classes[column];
+                return QueryTranslator.table_classes[column];
             }
 
         };
@@ -69,11 +72,11 @@ public final class MainFrame extends javax.swing.JFrame {
         initComponents();
 
         TableColumnModel tcm = output_table.getColumnModel();
-        
-        for(int i = 0; i < tcm.getColumnCount(); i++){
+
+        for (int i = 0; i < tcm.getColumnCount(); i++) {
             tcm.getColumn(i).setCellRenderer(cell);
         }
-        
+
         TableRowSorter<TableModel> sorter = new TableRowSorter(output_table.getModel());
 
         output_table.setRowSorter(sorter);
@@ -84,9 +87,13 @@ public final class MainFrame extends javax.swing.JFrame {
         ConsoleFrame.log("Initing Check Boxes");
         initializeCheckBoxes();
 
+        ConsoleFrame.log("Loading ConfigBox Model");
+
+        refreshConfigSelector();
+
         ConsoleFrame.log("Packing");
         pack();
-        
+
     }
 
     @SuppressWarnings("unchecked")
@@ -136,15 +143,22 @@ public final class MainFrame extends javax.swing.JFrame {
         jLabel11 = new javax.swing.JLabel();
         cfg_stat = new javax.swing.JTextField();
         cfg_save = new javax.swing.JButton();
-        cfg_reset = new javax.swing.JButton();
+        cfg_vis_reset = new javax.swing.JButton();
+        cfg_vis_default = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         parse_decoder = new javax.swing.JComboBox<>();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
         parse_table = new javax.swing.JComboBox<>();
         parse_reload = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel14 = new javax.swing.JLabel();
+        config_selector = new javax.swing.JComboBox<>();
         cfg_reload = new javax.swing.JButton();
         cfg_write = new javax.swing.JButton();
+        open_new = new javax.swing.JButton();
+        cfg_remove = new javax.swing.JButton();
+        cfg_add = new javax.swing.JButton();
 
         jCheckBox2.setText("jCheckBox2");
 
@@ -302,6 +316,7 @@ public final class MainFrame extends javax.swing.JFrame {
         TabbedPane.addTab("Info", InfoPanel);
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Query URL Formatting"));
+        jPanel2.setMinimumSize(new java.awt.Dimension(371, 211));
 
         jLabel6.setText("URL Format:");
 
@@ -328,6 +343,23 @@ public final class MainFrame extends javax.swing.JFrame {
 
         cfg_stat.setText("station={0}");
 
+        cfg_save.setText("Save");
+        cfg_save.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cfg_saveActionPerformed(evt);
+            }
+        });
+
+        cfg_vis_reset.setText("Reset");
+        cfg_vis_reset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cfg_vis_resetActionPerformed(evt);
+            }
+        });
+
+        cfg_vis_default.setText("Defaults");
+        cfg_vis_default.setEnabled(false);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -335,14 +367,6 @@ public final class MainFrame extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cfg_format, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel7)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cfg_url, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel10)
@@ -353,8 +377,24 @@ public final class MainFrame extends javax.swing.JFrame {
                             .addComponent(cfg_idroot)
                             .addComponent(cfg_reg)
                             .addComponent(cfg_stat, javax.swing.GroupLayout.DEFAULT_SIZE, 112, Short.MAX_VALUE)
-                            .addComponent(cfg_id))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(cfg_id))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cfg_save, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(cfg_vis_reset, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(cfg_vis_default, javax.swing.GroupLayout.Alignment.TRAILING)))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jLabel6)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(cfg_format, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jLabel7)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cfg_url, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 1, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -369,37 +409,33 @@ public final class MainFrame extends javax.swing.JFrame {
                     .addComponent(cfg_url, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(cfg_idroot, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cfg_id, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGap(27, 27, 27)
+                                .addComponent(jLabel9)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cfg_idroot, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cfg_id, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(27, 27, 27)
-                        .addComponent(jLabel9)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel10)
-                    .addComponent(cfg_reg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel11)
-                    .addComponent(cfg_stat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel10)
+                            .addComponent(cfg_reg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel11)
+                            .addComponent(cfg_stat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 21, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(cfg_vis_default)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cfg_vis_reset)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cfg_save)))
+                .addContainerGap())
         );
-
-        cfg_save.setText("Save");
-        cfg_save.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cfg_saveActionPerformed(evt);
-            }
-        });
-
-        cfg_reset.setText("Reset To Defaults");
-        cfg_reset.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cfg_resetActionPerformed(evt);
-            }
-        });
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Response Parsing"));
 
@@ -441,7 +477,7 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(parse_decoder, 0, 148, Short.MAX_VALUE)
                     .addComponent(parse_table, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(95, Short.MAX_VALUE))
+                .addContainerGap(98, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(parse_reload)
@@ -458,10 +494,21 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel13)
                     .addComponent(parse_table, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 18, Short.MAX_VALUE)
                 .addComponent(parse_reload)
                 .addContainerGap())
         );
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Config File"));
+
+        jLabel14.setText("Current Config:");
+
+        config_selector.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        config_selector.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                config_selectorActionPerformed(evt);
+            }
+        });
 
         cfg_reload.setText("Reload From File");
         cfg_reload.addActionListener(new java.awt.event.ActionListener() {
@@ -477,42 +524,96 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        open_new.setText("Open Cfg");
+        open_new.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                open_newActionPerformed(evt);
+            }
+        });
+
+        cfg_remove.setText("Remove");
+        cfg_remove.setEnabled(false);
+        cfg_remove.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cfg_removeActionPerformed(evt);
+            }
+        });
+
+        cfg_add.setText("Add Cfg");
+        cfg_add.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cfg_addActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(cfg_reload, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cfg_write, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(cfg_add)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(open_new)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cfg_remove))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel14)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(config_selector, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel14)
+                    .addComponent(config_selector, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(17, 17, 17)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cfg_add)
+                    .addComponent(open_new)
+                    .addComponent(cfg_remove))
+                .addGap(7, 7, 7)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cfg_write)
+                    .addComponent(cfg_reload))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout SettingsPanelLayout = new javax.swing.GroupLayout(SettingsPanel);
         SettingsPanel.setLayout(SettingsPanelLayout);
         SettingsPanelLayout.setHorizontalGroup(
             SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(SettingsPanelLayout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(24, 24, 24)
                 .addGroup(SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(SettingsPanelLayout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SettingsPanelLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(cfg_reset)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cfg_reload)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cfg_write)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cfg_save)))
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         SettingsPanelLayout.setVerticalGroup(
             SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(SettingsPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 148, Short.MAX_VALUE)
-                .addGroup(SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cfg_save)
-                    .addComponent(cfg_reload)
-                    .addComponent(cfg_write)
-                    .addComponent(cfg_reset))
-                .addContainerGap())
+                .addGroup(SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(SettingsPanelLayout.createSequentialGroup()
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(111, Short.MAX_VALUE))
         );
 
         TabbedPane.addTab("Settings", SettingsPanel);
@@ -587,14 +688,19 @@ public final class MainFrame extends javax.swing.JFrame {
         }
 
         QueryTranslator.onNewQuery();
-        
+
         current_query = new Thread(() -> {
 
             output_table_data.clear();
 
             output_table_data.setSize(0);
 
-            sysid = Integer.valueOf(system_id.getText());
+            String sys = system_id.getText();
+            if (sys.matches("\\d+")) {
+                sysid = Integer.valueOf(sys);
+            } else {
+                sysid = DatabaseManager.querySystemId(sys);
+            }
 
             int[] ids = Stream.of(model.toArray())
                     .map(Object::toString)
@@ -611,10 +717,18 @@ public final class MainFrame extends javax.swing.JFrame {
 
                     int[] subids = Arrays.copyOfRange(ids, Math.max(0, i - numperquery), i);
 
-                    output_table_data.addAll(DatabaseManager.getMarketInfoBulk(subids, sysid));
+                    System.out.println(QueryTranslator.active_parser);
+
+                    try {
+                        output_table_data.addAll(DatabaseManager.getMarketInfoBulk(subids, sysid));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        JOptionPane.showMessageDialog(this, "Error getting data from api", e.toString(), JOptionPane.ERROR_MESSAGE);
+                        break;
+                    }
 
                     i -= numperquery;
-                    
+
                 }
 
             } else {
@@ -628,9 +742,9 @@ public final class MainFrame extends javax.swing.JFrame {
             output_table.revalidate();
 
             output_table.repaint();
-            
+
             output_table.doLayout();
-            
+
             current_query.interrupt();
         });
 
@@ -663,7 +777,6 @@ public final class MainFrame extends javax.swing.JFrame {
 
         //TODO replace this
         //cell.setActive(use_filter.isSelected());
-
         output_table.revalidate();
 
     }//GEN-LAST:event_use_filterActionPerformed
@@ -681,119 +794,192 @@ public final class MainFrame extends javax.swing.JFrame {
 
     private void system_idFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_system_idFocusLost
 
-        try {
-            sysid = Integer.valueOf(system_id.getText());
-
-            system_id.setToolTipText(DatabaseManager.systems.get(sysid));
-        } catch (NumberFormatException _e) {
-
-            String text = system_id.getText();
-
-            Entry<Integer, String> ent = DatabaseManager.systems.entrySet().stream()
-                    .filter(e -> e.getValue().equalsIgnoreCase(text))
-                    .findAny().orElse(null);
-
-            if (ent == null) {
-                JOptionPane.showMessageDialog(this, "Error: System could not be interpreted");
-                return;
-            }
-
-            sysid = ent.getKey();
-            system_id.setToolTipText(sysid + "");
-
+        String sys = system_id.getText();
+        if (sys.matches("\\d+")) {
+            sysid = Integer.valueOf(sys);
+        } else {
+            sysid = DatabaseManager.querySystemId(sys);
         }
+
+        String name = DatabaseManager.querySystemName(sysid);
+
+        if (name != null) {
+            system_id.setToolTipText(name);
+        } else {
+            JOptionPane.showMessageDialog(this, "Could not find system " + sys,
+                    "Error finding system", JOptionPane.ERROR_MESSAGE);
+        }
+
     }//GEN-LAST:event_system_idFocusLost
 
     private void cfg_saveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_saveActionPerformed
-        ConfigManager.set("uformat", cfg_format.getText());
-        ConfigManager.set("url", cfg_url.getText());
-        ConfigManager.set("typeroot", cfg_idroot.getText());
-        ConfigManager.set("type", cfg_id.getText());
-        ConfigManager.set("region", cfg_reg.getText());
-        ConfigManager.set("station", cfg_stat.getText());
+        Configuration.set("uformat", cfg_format.getText());
+        Configuration.set("url", cfg_url.getText());
+        Configuration.set("typeroot", cfg_idroot.getText());
+        Configuration.set("type", cfg_id.getText());
+        Configuration.set("region", cfg_reg.getText());
+        Configuration.set("station", cfg_stat.getText());
     }//GEN-LAST:event_cfg_saveActionPerformed
 
-    private void cfg_resetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_resetActionPerformed
-
-        ConfigManager.reset();
-
-        refreshConfigVisuals();
-    }//GEN-LAST:event_cfg_resetActionPerformed
-
     private void parse_decoderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parse_decoderActionPerformed
-        
-        if(parse_decoder.getItemCount() == 0){
+
+        if (parse_decoder.getItemCount() == 0) {
             return;
         }
-        
+
         String item = parse_decoder.getSelectedItem().toString();
-        
-        try{
-            ConfigManager.setActiveParser(item);
-        }catch(NullPointerException e){
+
+        try {
+            QueryTranslator.setActiveParser(item);
+        } catch (NullPointerException e) {
             JOptionPane.showMessageDialog(this, "Error: that decoder doesn't exist, this should never happen", "Error", JOptionPane.ERROR_MESSAGE);
         }
-        
+
     }//GEN-LAST:event_parse_decoderActionPerformed
 
     private void onexit(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_onexit
-        ConfigManager.save();
+        QueryTranslator.terminate();
+        Configuration.close();
     }//GEN-LAST:event_onexit
 
     private void cfg_reloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_reloadActionPerformed
-        ConfigManager.load();
+        Configuration.reloadCurrent();
 
         refreshConfigVisuals();
     }//GEN-LAST:event_cfg_reloadActionPerformed
 
     private void parse_reloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parse_reloadActionPerformed
-        ConfigManager.loadParsers();
+        QueryTranslator.loadParsers();
 
         refreshConfigVisuals();
     }//GEN-LAST:event_parse_reloadActionPerformed
 
     private void parse_tableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parse_tableActionPerformed
-        
-        if(parse_table.getItemCount() == 0){
+
+        if (parse_table.getItemCount() == 0) {
             return;
         }
-        
+
         String item = parse_table.getSelectedItem().toString();
-        
-        try{
-            ConfigManager.setActiveTable(item);
-        }catch(NullPointerException e){
+
+        try {
+            QueryTranslator.setActiveTable(item);
+        } catch (NullPointerException e) {
             JOptionPane.showMessageDialog(this, "Error: that table generator doesn't exist, this should never happen", "Error", JOptionPane.ERROR_MESSAGE);
         }
-        
+
     }//GEN-LAST:event_parse_tableActionPerformed
 
     private void cfg_writeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_writeActionPerformed
-        
         this.cfg_saveActionPerformed(null);
-        
-        ConfigManager.save();
+        this.onexit(null);
     }//GEN-LAST:event_cfg_writeActionPerformed
 
-    public void refreshConfigVisuals() {
-        cfg_format.setText(ConfigManager.get("uformat"));
-        cfg_url.setText(ConfigManager.get("url"));
-        cfg_idroot.setText(ConfigManager.get("typeroot"));
-        cfg_id.setText(ConfigManager.get("type"));
-        cfg_reg.setText(ConfigManager.get("region"));
-        cfg_stat.setText(ConfigManager.get("station"));
+    private void config_selectorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_config_selectorActionPerformed
 
+        if (config_selector.getSelectedItem() != null) {
+            Configuration.setActive(config_selector.getSelectedItem().toString());
+        }
+        refreshConfigVisuals();
+        refreshConfigSelector();
+    }//GEN-LAST:event_config_selectorActionPerformed
+
+    private void open_newActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_open_newActionPerformed
+
+        JFileChooser chooser = new JFileChooser();
+
+        chooser.setCurrentDirectory(new File("./")); // does this work on windows?
+
+        chooser.setFileFilter(new FileNameExtensionFilter("Config", "cfg"));
+
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+
+            try {
+                Configuration.loadFromFile(chooser.getSelectedFile());
+                refreshConfigSelector();
+            } catch (FileNotFoundException ex) {
+                JOptionPane.showMessageDialog(this,
+                        "Error: could not load " + chooser.getSelectedFile().getAbsolutePath(),
+                        "File Not Found Exception", JOptionPane.ERROR_MESSAGE);
+            }
+
+        }
+
+        refreshConfigSelector();
+        refreshConfigVisuals();
+
+    }//GEN-LAST:event_open_newActionPerformed
+
+    private void cfg_addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_addActionPerformed
+
+        String name = JOptionPane.showInputDialog(this, "Enter name:");
+
+        Configuration.addNew(name);
+        Configuration.setActive(name);
+
+        refreshConfigSelector();
+        refreshConfigVisuals();
+
+    }//GEN-LAST:event_cfg_addActionPerformed
+
+    private void cfg_removeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_removeActionPerformed
+
+    }//GEN-LAST:event_cfg_removeActionPerformed
+
+    private void cfg_vis_resetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_vis_resetActionPerformed
+        refreshConfigVisuals();
+    }//GEN-LAST:event_cfg_vis_resetActionPerformed
+
+    public void refreshConfigSelector() {
+
+        config_selector.removeAllItems();
+
+        Configuration.configs.forEach((s) -> {
+            config_selector.addItem(s.name);
+        });
+
+        config_selector.setSelectedIndex(Configuration.current);
+
+    }
+
+    public void refreshConfigVisuals() {
+        cfg_format.setText(Configuration.get("uformat"));
+        cfg_url.setText(Configuration.get("url"));
+        cfg_idroot.setText(Configuration.get("typeroot"));
+        cfg_id.setText(Configuration.get("type"));
+        cfg_reg.setText(Configuration.get("region"));
+        cfg_stat.setText(Configuration.get("station"));
+
+        int index = 0;
+        
         parse_decoder.removeAllItems();
         
-        ConfigManager.query_parsers.forEach((cfg) -> {
-            parse_decoder.addItem(cfg.name);
-        });
+        for(int i = 0; i < QueryTranslator.query_parsers.size(); i++){
+            QueryTranslator.XMLLuaConfig xml = QueryTranslator.query_parsers.get(i);
+            parse_decoder.addItem(xml.name);
+            if(xml.name.equals(Configuration.get("query-parser"))){
+                index = i;
+            }
+        }
+        
+        System.out.println(index);
+        
+        parse_decoder.setSelectedIndex(index);
+        
+        index = 0;
         
         parse_table.removeAllItems();
+
+        for(int i = 0; i < QueryTranslator.table_generators.size(); i++){
+            QueryTranslator.XMLLuaConfig xml = QueryTranslator.table_generators.get(i);
+            parse_table.addItem(xml.name);
+            if(xml == QueryTranslator.active_table){
+                index = i;
+            }
+        }
         
-        ConfigManager.table_generators.forEach((cfg) -> {
-            parse_table.addItem(cfg.name);
-        });
+        parse_table.setSelectedIndex(index);
+        
     }
 
     public void setSelectedGroup(int id, boolean selected) {
@@ -896,16 +1082,20 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel SelectionPanel;
     private javax.swing.JPanel SettingsPanel;
     private javax.swing.JTabbedPane TabbedPane;
+    private javax.swing.JButton cfg_add;
     private javax.swing.JTextField cfg_format;
     private javax.swing.JTextField cfg_id;
     private javax.swing.JTextField cfg_idroot;
     private javax.swing.JTextField cfg_reg;
     private javax.swing.JButton cfg_reload;
-    private javax.swing.JButton cfg_reset;
+    private javax.swing.JButton cfg_remove;
     private javax.swing.JButton cfg_save;
     private javax.swing.JTextField cfg_stat;
     private javax.swing.JTextField cfg_url;
+    private javax.swing.JButton cfg_vis_default;
+    private javax.swing.JButton cfg_vis_reset;
     private javax.swing.JButton cfg_write;
+    private javax.swing.JComboBox<String> config_selector;
     private javax.swing.JButton deselect;
     private javax.swing.JButton jButton1;
     private javax.swing.JCheckBox jCheckBox2;
@@ -914,6 +1104,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -922,6 +1113,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
@@ -929,6 +1121,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton load_items;
     private javax.swing.JTextField max_cost_field;
     private javax.swing.JTextField min_margin_field;
+    private javax.swing.JButton open_new;
     private javax.swing.JTable output_table;
     private javax.swing.JComboBox<String> parse_decoder;
     private javax.swing.JButton parse_reload;
