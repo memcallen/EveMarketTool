@@ -717,8 +717,6 @@ public final class MainFrame extends javax.swing.JFrame {
 
                     int[] subids = Arrays.copyOfRange(ids, Math.max(0, i - numperquery), i);
 
-                    System.out.println(QueryTranslator.active_parser);
-
                     try {
                         output_table_data.addAll(DatabaseManager.getMarketInfoBulk(subids, sysid));
                     } catch (Exception e) {
@@ -961,8 +959,6 @@ public final class MainFrame extends javax.swing.JFrame {
                 index = i;
             }
         }
-        
-        System.out.println(index);
         
         parse_decoder.setSelectedIndex(index);
         
