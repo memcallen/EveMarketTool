@@ -16,6 +16,8 @@ function translate(json)
 	buy = {}
 	sell = {}
 	
+	json = json:getAsJsonObject()
+	
 	for k, id in pairs(getTypes())
 	do
 		

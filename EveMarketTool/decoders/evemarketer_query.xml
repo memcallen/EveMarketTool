@@ -1,0 +1,8 @@
+<config>
+	<query-parser>
+		
+		<name>Evemarketer</name>
+		<lua-file>evemarketer.lua</lua-file>
+		
+	</query-parser>
+</config>

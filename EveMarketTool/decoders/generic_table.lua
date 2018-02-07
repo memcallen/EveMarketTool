@@ -16,14 +16,14 @@ function getColumnNames()
 	return {"Name", "Buy Price", "Sell Price", "% Margin", "Volume"}
 end
 
-function translateTableCol(buy, sell, opts)
+function translateTableCol(buy, sell, props)
 	
 	r = translateTable(buy, sell)
-	opts[2]:Set(r[1])
+	props:put("name", r[1])
 	if isnan(r[4]) or isinfinite(r[4]) then
-		opts[1]:Set("red")
+		props:put("color", "red")
 	else
-		opts[1]:Set("none")
+		props:put("color", "none")
 	end
 		
 	return r
