@@ -41,7 +41,7 @@ import javax.swing.JOptionPane;
 public class DatabaseManager {
 
     //LOG FILE STUFF
-    private static final File LOGFILE = new File("LOG-" + Time.from(Instant.now()));
+    private static final File LOGFILE = new File("LOG-" + System.currentTimeMillis());
     private static OutputStream log_stream = null;
 
     private static final OutputStream CONSOLE_STREAM = new OutputStream() {
