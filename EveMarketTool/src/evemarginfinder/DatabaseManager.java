@@ -16,8 +16,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.sql.Time;
-import java.time.Instant;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.Vector;
+import java.util.concurrent.SynchronousQueue;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -96,7 +95,7 @@ public class DatabaseManager {
     }
 
     public ItemGroup[] groups;
-    public List<Integer> selected_items = new ArrayList<>();
+    public List<Integer> selected_items_ = new ArrayList<>();
     public Consumer<Integer> visual_selector_groups = System.out::println;
     public Consumer<Integer> visual_selector_items = System.out::println;
     public MainFrame gui = null;
@@ -110,6 +109,12 @@ public class DatabaseManager {
     public static Queue<Integer> groups_q = new LinkedList<>();
     public static Queue<Integer> items_q = new LinkedList<>();
 
+    public static Queue<Entry<Integer, Boolean>> change_groups = new SynchronousQueue<>();
+    public static Queue<Entry<Integer, Boolean>> change_items = new SynchronousQueue<>();
+    
+    public static HashMap<Integer, Boolean> selected_groups = new HashMap<>();
+    public static HashMap<Integer, Boolean> selected_items = new HashMap<>();
+    
     public static JsonParser parser = new JsonParser();
 
     public static String getQueryURL(int[] itemids, int loc, boolean stat) {
@@ -285,7 +290,7 @@ public class DatabaseManager {
         }
 
         while (items_q.size() > 0) {
-            selected_items.add(items_q.poll());
+            selected_items_.add(items_q.poll());
         }
 
     }

@@ -15,9 +15,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 /**
  *
@@ -184,6 +186,10 @@ public class Configuration {
 
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Direct Manipulation">
+    public static Stream<Entry<String, String>> stream(){
+        return configs.get(current).cfg.entrySet().stream();
+    }
+    
     public static void clear() {
         configs.get(current)._clear();
     }
