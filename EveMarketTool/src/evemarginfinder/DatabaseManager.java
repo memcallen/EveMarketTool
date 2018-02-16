@@ -99,6 +99,7 @@ public class DatabaseManager {
     public Consumer<Integer> visual_selector_groups = System.out::println;
     public Consumer<Integer> visual_selector_items = System.out::println;
     public MainFrame gui = null;
+    public FilterFrame filterf = new FilterFrame();
 
     public static Entry<Integer, String>[] items; //I should've used a map but oh well
     public static HashMap<String, Integer> systems = new HashMap<>();
@@ -139,6 +140,8 @@ public class DatabaseManager {
 
         ConsoleFrame.log("Querying " + url);
 
+        long pre = System.currentTimeMillis();
+        
         JsonElement response;
 
         try {
@@ -150,7 +153,16 @@ public class DatabaseManager {
             return null;
         }
 
-        return QueryTranslator.getTableData(QueryTranslator.translate(itemid, response));
+        ConsoleFrame.log("Received response in " + (System.currentTimeMillis() - pre) + "ms");
+        ConsoleFrame.log("Translating response");
+        
+        pre = System.currentTimeMillis();
+        
+        List<Vector> out = QueryTranslator.getTableData(QueryTranslator.translate(itemid, response));
+        
+        ConsoleFrame.log("Translated in " + (System.currentTimeMillis() - pre) + "ms");
+        
+        return out;
     }
 
     public static JsonElement read(String string) throws IOException {
@@ -266,7 +278,7 @@ public class DatabaseManager {
             entries_groups[i] = new AbstractMap.SimpleEntry<>(group.id, group.name);
         }
 
-        gui = new MainFrame(entries_groups, items);
+        gui = new MainFrame(entries_groups, items, filterf);
 
         visual_selector_groups = i -> gui.setSelectedGroup(i, true);
         visual_selector_items = i -> gui.setSelectedItem(i, true);
@@ -366,9 +378,13 @@ public class DatabaseManager {
             
             QueryTranslator.initialize();
 
-            QueryTranslator.reset_lua();
-
             DatabaseManager man = new DatabaseManager();
+
+            man.filterf = new FilterFrame();
+            man.filterf.loadCfg();
+            QueryTranslator.setFilter(man.filterf);
+            
+            QueryTranslator.reset_lua();
 
             ConsoleFrame.log("Initing stuff");
 

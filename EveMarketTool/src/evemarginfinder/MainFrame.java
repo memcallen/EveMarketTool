@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
@@ -43,7 +44,12 @@ public final class MainFrame extends javax.swing.JFrame {
 
     private static Thread current_query;
 
-    public MainFrame(Entry<Integer, String>[] entries_groups, Entry<Integer, String>[] entries_items) {
+    private FilterFrame filter;
+    
+    //public ConcurrentLinkedQueue<Integer> item_queue = new ConcurrentLinkedQueue<>();
+    //public ConcurrentLinkedQueue<Integer> group_queue = new ConcurrentLinkedQueue<>();
+    
+    public MainFrame(Entry<Integer, String>[] entries_groups, Entry<Integer, String>[] entries_items, FilterFrame filter) {
 
         ConsoleFrame.log("Loading laf");
         try {
@@ -83,6 +89,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         ItemGroups = entries_groups;
         Items = entries_items;
+        this.filter = filter;
 
         ConsoleFrame.log("Initing Check Boxes");
         initializeCheckBoxes();
@@ -116,10 +123,6 @@ public final class MainFrame extends javax.swing.JFrame {
         InfoPanel = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         load_items = new javax.swing.JButton();
-        min_margin_field = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        max_cost_field = new javax.swing.JTextField();
         jScrollPane3 = new javax.swing.JScrollPane();
         selected_items = new javax.swing.JList();
         selected_items_refresh = new javax.swing.JButton();
@@ -129,6 +132,7 @@ public final class MainFrame extends javax.swing.JFrame {
         jLabel8 = new javax.swing.JLabel();
         system_id = new javax.swing.JTextField();
         rem_inv = new javax.swing.JCheckBox();
+        show_filters = new javax.swing.JButton();
         SettingsPanel = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
@@ -248,20 +252,6 @@ public final class MainFrame extends javax.swing.JFrame {
         });
         InfoPanel.add(load_items, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 300, -1, -1));
 
-        min_margin_field.setText("0.1");
-        InfoPanel.add(min_margin_field, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 120, 80, -1));
-
-        jLabel4.setFont(jLabel4.getFont());
-        jLabel4.setText("Min Margin %");
-        InfoPanel.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 100, -1, -1));
-
-        jLabel5.setFont(jLabel5.getFont());
-        jLabel5.setText("Maximum Cost");
-        InfoPanel.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 150, -1, -1));
-
-        max_cost_field.setText("10000000");
-        InfoPanel.add(max_cost_field, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 170, 80, -1));
-
         selected_items.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         selected_items.setModel(model);
         jScrollPane3.setViewportView(selected_items);
@@ -312,6 +302,14 @@ public final class MainFrame extends javax.swing.JFrame {
         rem_inv.setFont(rem_inv.getFont());
         rem_inv.setText("Remove Invalids");
         InfoPanel.add(rem_inv, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 270, -1, -1));
+
+        show_filters.setText("Show Filters");
+        show_filters.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                show_filtersActionPerformed(evt);
+            }
+        });
+        InfoPanel.add(show_filters, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 170, -1, -1));
 
         TabbedPane.addTab("Info", InfoPanel);
 
@@ -837,6 +835,9 @@ public final class MainFrame extends javax.swing.JFrame {
 
     private void onexit(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_onexit
         QueryTranslator.terminate();
+        filter.saveCfg();
+        
+        //Must be last
         Configuration.close();
     }//GEN-LAST:event_onexit
 
@@ -927,6 +928,10 @@ public final class MainFrame extends javax.swing.JFrame {
     private void cfg_vis_resetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_vis_resetActionPerformed
         refreshConfigVisuals();
     }//GEN-LAST:event_cfg_vis_resetActionPerformed
+
+    private void show_filtersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_show_filtersActionPerformed
+        filter.setVisible(!filter.isVisible());
+    }//GEN-LAST:event_show_filtersActionPerformed
 
     public void refreshConfigSelector() {
 
@@ -1103,8 +1108,6 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
@@ -1115,8 +1118,6 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JButton load_items;
-    private javax.swing.JTextField max_cost_field;
-    private javax.swing.JTextField min_margin_field;
     private javax.swing.JButton open_new;
     private javax.swing.JTable output_table;
     private javax.swing.JComboBox<String> parse_decoder;
@@ -1125,6 +1126,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JCheckBox rem_inv;
     private javax.swing.JList selected_items;
     private javax.swing.JButton selected_items_refresh;
+    private javax.swing.JButton show_filters;
     private javax.swing.JTextField system_id;
     private javax.swing.JCheckBox use_filter;
     // End of variables declaration//GEN-END:variables

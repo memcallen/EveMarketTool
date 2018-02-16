@@ -1,4 +1,6 @@
 
+print(filter:get("Foobar"))
+
 function convert(id, root)
 	
 	return {

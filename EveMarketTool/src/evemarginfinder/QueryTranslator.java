@@ -64,6 +64,24 @@ public class QueryTranslator {
 
     }
 
+    private static class FilterWrapper{
+        
+        private FilterFrame filter;
+        
+        public FilterWrapper(FilterFrame filters){
+            filter = filters;
+        }
+        
+        public String get(String key){
+            return filter.get(key);
+        }
+        
+        public boolean set(String key, String value){
+            return filter.set(key, value);
+        }
+        
+    }
+    
     public static class XMLLuaConfig {
 
         public final String name, file;
@@ -79,7 +97,8 @@ public class QueryTranslator {
     public static LuaValue root = null;
     public static getTypes typeFunc = new getTypes();
     public static String decoder_dir = "decoders/";
-
+    private static FilterFrame filters;
+   
     public final static JsonParser PARSER = new JsonParser();
 
     public final static HashMap<String, Color> COLORS = new HashMap<>();
@@ -420,6 +439,10 @@ public class QueryTranslator {
         return ret;
     }
 
+    public static void setFilter(FilterFrame filter){
+        filters = filter; 
+    }
+    
     /**
      * Ran after Configs are loaded & whenever the query files are changed
      */
@@ -457,6 +480,8 @@ public class QueryTranslator {
             }
         }));
 
+        root.set(LuaValue.valueOf("filter"), CoerceJavaToLua.coerce(new FilterWrapper(filters)));
+        
         try {
             root.get("dofile").call(LuaValue.valueOf(active_parser.file));
         } catch (LuaError e) {
