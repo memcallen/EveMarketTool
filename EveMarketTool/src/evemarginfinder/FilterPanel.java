@@ -7,7 +7,7 @@ package evemarginfinder;
 
 /**
  *
- * @author austin-z
+ * @author Memcallen Kahoudi/Recursive Pineapple
  */
 public class FilterPanel extends javax.swing.JPanel {
 
@@ -93,8 +93,9 @@ public class FilterPanel extends javax.swing.JPanel {
 
         exit_button.setText("X");
         exit_button.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        exit_button.setMinimumSize(new java.awt.Dimension(13, 18));
-        exit_button.setPreferredSize(new java.awt.Dimension(15, 18));
+        exit_button.setMaximumSize(new java.awt.Dimension(40, 20));
+        exit_button.setMinimumSize(new java.awt.Dimension(40, 20));
+        exit_button.setPreferredSize(new java.awt.Dimension(40, 20));
         exit_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exit_buttonActionPerformed(evt);

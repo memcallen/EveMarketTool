@@ -1,13 +1,10 @@
 package evemarginfinder;
 
-import evemarginfinder.DatabaseManager.CheckBoxListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Stream;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -27,10 +24,6 @@ public final class MainFrame extends javax.swing.JFrame {
     public Entry<Integer, String>[] ItemGroups = null;
     public Entry<Integer, String>[] Items = null;
 
-    public JCheckBox[] ItemGroups_CheckBoxes = null;
-    public JCheckBox[] Items_CheckBoxes = null;
-    public java.awt.GridLayout ItemGroups_Layout = new java.awt.GridLayout(0, 1);
-    public java.awt.GridLayout Items_Layout = new java.awt.GridLayout(0, 1);
     public DefaultListModel model = new DefaultListModel();
     public DefaultTableModel table_model;
 
@@ -45,9 +38,6 @@ public final class MainFrame extends javax.swing.JFrame {
     private static Thread current_query;
 
     private FilterFrame filter;
-    
-    //public ConcurrentLinkedQueue<Integer> item_queue = new ConcurrentLinkedQueue<>();
-    //public ConcurrentLinkedQueue<Integer> group_queue = new ConcurrentLinkedQueue<>();
     
     public MainFrame(Entry<Integer, String>[] entries_groups, Entry<Integer, String>[] entries_items, FilterFrame filter) {
 
@@ -92,11 +82,12 @@ public final class MainFrame extends javax.swing.JFrame {
         this.filter = filter;
 
         ConsoleFrame.log("Initing Check Boxes");
-        initializeCheckBoxes();
+        CheckBoxHandler.initializeCheckBoxes(ItemGroupPanel, ItemPanel);
 
         ConsoleFrame.log("Loading ConfigBox Model");
 
         refreshConfigSelector();
+        refreshConfigVisuals();
 
         ConsoleFrame.log("Packing");
         pack();
@@ -623,25 +614,15 @@ public final class MainFrame extends javax.swing.JFrame {
 
     private void deselectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deselectActionPerformed
 
-        for (JCheckBox box : ItemGroups_CheckBoxes) {
-            if (box.isSelected()) {
-                box.setSelected(false);
-            }
-        }
-
-        for (JCheckBox box : Items_CheckBoxes) {
-            if (box.isSelected()) {
-                box.setSelected(false);
-            }
-        }
-
+        CheckBoxHandler.deselectAll();
+        
     }//GEN-LAST:event_deselectActionPerformed
 
     private void ItemGroupSearchKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ItemGroupSearchKeyTyped
 
         if (evt.getKeyChar() == '\n') {
             int found = 0;
-            for (JCheckBox box : ItemGroups_CheckBoxes) {
+            for (JCheckBox box : CheckBoxHandler.ItemGroups_CheckBoxes) {
                 if (box.getText().toLowerCase().contains(ItemGroupSearch.getText().toLowerCase())) {
                     found++;
                     if (found > group_search_index) {
@@ -667,7 +648,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         model.clear();
 
-        for (JCheckBox box : Items_CheckBoxes) {
+        for (JCheckBox box : CheckBoxHandler.Items_CheckBoxes) {
             if (box.isSelected()) {
                 model.addElement(box.getText());
             }
@@ -700,10 +681,7 @@ public final class MainFrame extends javax.swing.JFrame {
                 sysid = DatabaseManager.querySystemId(sys);
             }
 
-            int[] ids = Stream.of(model.toArray())
-                    .map(Object::toString)
-                    .mapToInt(DatabaseManager::queryItemId)
-                    .toArray();
+            int[] ids = CheckBoxHandler.getItems();
 
             int numperquery = 20;
 
@@ -753,7 +731,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         if (evt.getKeyChar() == '\n') {
             int found = 0;
-            for (JCheckBox box : Items_CheckBoxes) {
+            for (JCheckBox box : CheckBoxHandler.Items_CheckBoxes) {
                 if (box.getText().toLowerCase().contains(ItemSearch.getText().toLowerCase())) {
                     found++;
                     if (found > item_search_index) {
@@ -981,95 +959,6 @@ public final class MainFrame extends javax.swing.JFrame {
         
         parse_table.setSelectedIndex(index);
         
-    }
-
-    public void setSelectedGroup(int id, boolean selected) {
-        for (JCheckBox box : ItemGroups_CheckBoxes) {
-            if (box.getToolTipText().equals(Integer.toString(id))) {
-                box.setSelected(selected);
-                return;
-            }
-        }
-    }
-
-    public void setSelectedItem(int id, boolean selected) {
-        for (JCheckBox box : Items_CheckBoxes) {
-            if (box.getToolTipText().equals(Integer.toString(id))) {
-                box.setSelected(selected);
-                return;
-            }
-        }
-    }
-
-    public void initializeCheckBoxes() {
-
-        ConsoleFrame.log("Checkboxes - Initing stuff");
-
-        ItemGroupPanel.setLayout(ItemGroups_Layout);
-        ItemPanel.setLayout(Items_Layout);
-
-        CheckBoxListener group = new CheckBoxListener(true);
-        CheckBoxListener item = new CheckBoxListener(false);
-
-        ConsoleFrame.log("Checkboxes - Doing Groups");
-
-        //Groups
-        ItemGroups_CheckBoxes = new JCheckBox[ItemGroups.length];
-
-        ItemGroups_Layout.setRows(ItemGroups.length + 1);
-
-        int perc = ItemGroups.length / 20;
-
-        long pre = System.currentTimeMillis();
-
-        for (int i = 0; i < ItemGroups.length; i++) {
-            JCheckBox box = new JCheckBox(ItemGroups[i].getValue());
-            ItemGroups_CheckBoxes[i] = box;
-
-            box.setToolTipText(ItemGroups[i].getKey().toString());
-
-            box.addItemListener(group);
-
-            ItemGroupPanel.add(box);
-
-            if (i % perc == 0) {
-                ConsoleFrame.log("Checkboxes - Group:" + Math.round(i / perc * 100) / 100 * 5);
-            }
-
-        }
-
-        ConsoleFrame.log("Created Checkboxes:Groups in " + (System.currentTimeMillis() - pre) + " millis");
-
-        ConsoleFrame.log("Checkboxes - Doing Items");
-        //Items
-        Items_CheckBoxes = new JCheckBox[Items.length];
-
-        Items_Layout.setRows(Items.length + 1);
-
-        perc = Items.length / 20;
-
-        pre = System.currentTimeMillis();
-
-        for (int i = 0; i < Items.length; i++) {
-            JCheckBox box = new JCheckBox(Items[i].getValue());
-            Items_CheckBoxes[i] = box;
-
-            box.setToolTipText(Items[i].getKey().toString());
-
-            box.addItemListener(item);
-
-            ItemPanel.add(box);
-
-            if (i % perc == 0) {
-                ConsoleFrame.log("Checkboxes - Item:" + Math.round(i / perc * 100) / 100 * 5);
-            }
-
-        }
-
-        ConsoleFrame.log("Created Checkboxes:Items in " + (System.currentTimeMillis() - pre) + " millis");
-
-        refreshConfigVisuals();
-
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
