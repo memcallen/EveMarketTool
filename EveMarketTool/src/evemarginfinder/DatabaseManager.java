@@ -2,8 +2,6 @@ package evemarginfinder;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.File;
@@ -19,25 +17,18 @@ import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Queue;
 import java.util.Scanner;
 import java.util.Vector;
-import java.util.concurrent.SynchronousQueue;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.IntStream;
-import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 
 /**
  *
  * @author Memcallen Kahoudi/Recursive Pineapple
  */
-public class DatabaseManager {
+public class DatabaseManager extends Thread{
 
     //LOG FILE STUFF
     private static final File LOGFILE = new File("LOG-" + System.currentTimeMillis());
@@ -58,46 +49,7 @@ public class DatabaseManager {
     };
     //END LOG FILE STUFF
 
-    public static class CheckBoxListener implements ItemListener {
-
-        private boolean isgroup = true;
-
-        /**
-         * @param isgroup true=is a group, false=is an item
-         */
-        public CheckBoxListener(boolean isgroup) {
-            this.isgroup = isgroup;
-        }
-
-        @Override
-        public void itemStateChanged(ItemEvent e) {
-
-            //when the checkbox state gets changed through setSelected, this listener gets called
-            //this line prevents unnecessary recursion
-            if (!((JCheckBox) e.getItem()).hasFocus()) {
-                return;
-            }
-
-            if (e.getStateChange() == ItemEvent.DESELECTED) {
-                return;
-            }
-
-            int id = Integer.valueOf(((JCheckBox) e.getItem()).getToolTipText());
-
-            if (isgroup) {
-                DatabaseManager.selectGroup_Queue(id);
-            } else {
-                DatabaseManager.selectItem_Queue(id);
-            }
-
-        }
-
-    }
-
     public ItemGroup[] groups;
-    public List<Integer> selected_items_ = new ArrayList<>();
-    public Consumer<Integer> visual_selector_groups = System.out::println;
-    public Consumer<Integer> visual_selector_items = System.out::println;
     public MainFrame gui = null;
     public FilterFrame filterf = new FilterFrame();
 
@@ -107,15 +59,6 @@ public class DatabaseManager {
     public static String itemFile = "typeid.txt";
     public static String systemFile = "systems.txt";
 
-    public static Queue<Integer> groups_q = new LinkedList<>();
-    public static Queue<Integer> items_q = new LinkedList<>();
-
-    public static Queue<Entry<Integer, Boolean>> change_groups = new SynchronousQueue<>();
-    public static Queue<Entry<Integer, Boolean>> change_items = new SynchronousQueue<>();
-    
-    public static HashMap<Integer, Boolean> selected_groups = new HashMap<>();
-    public static HashMap<Integer, Boolean> selected_items = new HashMap<>();
-    
     public static JsonParser parser = new JsonParser();
 
     public static String getQueryURL(int[] itemids, int loc, boolean stat) {
@@ -271,6 +214,10 @@ public class DatabaseManager {
         loadItems();
         loadSystems();
 
+        ConsoleFrame.log("Loading CheckBoxHandler");
+        
+        CheckBoxHandler.setData(groups, items);
+        
         Entry<Integer, String>[] entries_groups = new Entry[temp.size()];
 
         for (int i = 0; i < groups.length; i++) {
@@ -278,83 +225,60 @@ public class DatabaseManager {
             entries_groups[i] = new AbstractMap.SimpleEntry<>(group.id, group.name);
         }
 
+        ConsoleFrame.log("Loading Main Interface");
+        
         gui = new MainFrame(entries_groups, items, filterf);
-
-        visual_selector_groups = i -> gui.setSelectedGroup(i, true);
-        visual_selector_items = i -> gui.setSelectedItem(i, true);
 
         gui.setVisible(true);
 
     }
 
-    public static void selectGroup_Queue(int id) {
-        groups_q.add(id);
-    }
+    @Override
+    public void run(){
+        
+            Configuration.initialize();
+            
+            QueryTranslator.initialize();
 
-    public static void selectItem_Queue(int id) {
-        items_q.add(id);
-    }
+            CheckBoxHandler.initialize();
+            
+            filterf = new FilterFrame();
+            filterf.loadCfg();
+            QueryTranslator.setFilter(filterf);
+            
+            QueryTranslator.reset_lua();
 
-    public void checkSelections() {
+            ConsoleFrame.log("Initing stuff");
 
-        while (groups_q.size() > 0) {
-            selectGroup(groups_q.poll());
-        }
-
-        while (items_q.size() > 0) {
-            selected_items_.add(items_q.poll());
-        }
-
-    }
-
-    public void selectGroup(int id) {
-        selectGroup(id, 0);
-    }
-
-    private void selectGroup(int id, int n) {
-        if (groups == null) {
-            throw new Error("Initialize groups first (loadGroups error/not called)");
-        }
-
-        ItemGroup group = null;
-        int group_index = 0;
-
-        for (; group_index < groups.length; group_index++) {
-            if (groups[group_index].id == id) {
-                group = groups[group_index];
-                break;
-            }
-        }
-
-        if (group == null) {
-            throw new Error("Error, no group with that id, id=" + id + ", iter#=" + n);
-        }
-
-        visual_selector_groups.accept(group.id);
-
-        if (group.children.size() > 0) {
-
-            group.children.forEach(child -> selectGroup(child, n + 1));
-
-        }
-
-        if (group.items.size() > 0) {
-
-            for (int i = 0; i < group.items.size(); i++) {
-                visual_selector_items.accept(group.items.get(i));
+            try {
+                initialize();
+            } catch (FileNotFoundException ex) {
+                ConsoleFrame.log("Error initializing database manager: " + ex.getMessage());
+                return;
             }
 
-        }
+            ConsoleFrame.log("Finished loading data, showing window");
+
+            ConsoleFrame.log("Starting selector loop");
+
+            while(true){
+                try {
+                    Thread.sleep(1000);//infinite sleep because I'm not sure what to do here
+                } catch (InterruptedException ex) {
+                }
+            }
 
     }
-
+    
     public static void main(String[] args) {
 
         if (!LOGFILE.exists()) {
             try {
                 LOGFILE.createNewFile();
             } catch (IOException ex) {
-                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+                ConsoleFrame.log("Could not create logfile, maybe program is in read only folder?");
+                ConsoleFrame.log(ex.getMessage());
+                return;
             }
         }
 
@@ -363,7 +287,9 @@ public class DatabaseManager {
 
             System.setErr(new PrintStream(log_stream));
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            ConsoleFrame.log("Something went very wrong, could not open file that was just created");
+            ConsoleFrame.log(ex.getMessage());
+            return;
         }
 
         ConsoleFrame frame = new ConsoleFrame();
@@ -372,37 +298,7 @@ public class DatabaseManager {
 
         frame.setVisible(true);
 
-        Thread t = new Thread(() -> {
-
-            Configuration.initialize();
-            
-            QueryTranslator.initialize();
-
-            DatabaseManager man = new DatabaseManager();
-
-            man.filterf = new FilterFrame();
-            man.filterf.loadCfg();
-            QueryTranslator.setFilter(man.filterf);
-            
-            QueryTranslator.reset_lua();
-
-            ConsoleFrame.log("Initing stuff");
-
-            try {
-                man.initialize();
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
-                return;
-            }
-
-            ConsoleFrame.log("Finished loading data, showing window");
-
-            ConsoleFrame.log("Starting selector loop");
-
-            while (true) {
-                man.checkSelections();
-            }
-        });
+        Thread t = new DatabaseManager();
 
         t.setName("main-thread");
 
