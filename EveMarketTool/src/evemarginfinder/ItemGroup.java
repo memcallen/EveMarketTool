@@ -14,6 +14,7 @@ public class ItemGroup {
     
     public int parent = -1;
     public int id = -1;
+    public int superparent = -1;
     public List<Integer> children = new ArrayList<>();
     public String name = "";
     public String desc = "";
