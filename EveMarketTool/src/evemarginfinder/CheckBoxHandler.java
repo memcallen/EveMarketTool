@@ -63,7 +63,7 @@ public class CheckBoxHandler extends Thread {
 
     //<editor-fold defaultstate="collapsed" desc="Variable Definitions">
     public static ItemGroup[] item_groups;
-    private static HashMap<Integer, ItemGroup> itemgroup_lookup_id = new HashMap<>();
+    public static HashMap<Integer, ItemGroup> itemgroup_lookup_id = new HashMap<>();
     public static Map.Entry<Integer, String>[] items = null;
 
     public static JCheckBox[] ItemGroups_CheckBoxes = null;
@@ -158,10 +158,10 @@ public class CheckBoxHandler extends Thread {
 
     public static int[] getItems() {
 
-        if(id_cache == null){
+        if (id_cache == null) {
             return null;
         }
-        
+
         //id_cache is only used to store the ids, it is never returned
         int[] array = new int[id_cache.length];
         System.arraycopy(id_cache, 0, array, 0, id_cache.length);
@@ -170,10 +170,10 @@ public class CheckBoxHandler extends Thread {
 
     public static int[] getGroups() {
 
-        if(group_cache == null){
+        if (group_cache == null) {
             return null;
         }
-        
+
         int[] array = new int[group_cache.length];
         System.arraycopy(group_cache, 0, array, 0, group_cache.length);
         return array;
@@ -305,12 +305,22 @@ public class CheckBoxHandler extends Thread {
         long pre = System.currentTimeMillis();
 
         for (int i = 0; i < item_groups.length; i++) {
-            JCheckBox box = new JCheckBox(item_groups[i].name);
+            ItemGroup curr = item_groups[i];
+
+            JCheckBox box = new JCheckBox(curr.name);
             ItemGroups_CheckBoxes[i] = box;
 
-            box.setToolTipText(Integer.toString(item_groups[i].id));
+            if (curr.superparent == -1) {
+                box.setToolTipText(String.format("Id: %d, Is Super", curr.id));
+            } else {
+                System.out.println(curr + ";" + curr.superparent);
+                box.setToolTipText(
+                        String.format("Id: %d, Super: %s", curr.id,
+                                itemgroup_lookup_id.get(curr.superparent).name
+                        ));
+            }
 
-            box.addItemListener(new CheckBoxListener(item_groups[i].id, group_queue, group_queue_des));
+            box.addItemListener(new CheckBoxListener(curr.id, group_queue, group_queue_des));
 
             item_group_panel.add(box);
 
@@ -359,13 +369,11 @@ public class CheckBoxHandler extends Thread {
 
     }
 
-    public static void setData(ItemGroup[] item_groups, Map.Entry<Integer, String>[] items) {
+    public static void setData(ItemGroup[] item_groups, Map.Entry<Integer, String>[] items,
+            HashMap<Integer, ItemGroup> group_lookup) {
         CheckBoxHandler.item_groups = item_groups;
         CheckBoxHandler.items = items;
-
-        for (ItemGroup ig : item_groups) {
-            itemgroup_lookup_id.put(ig.id, ig);
-        }
+        CheckBoxHandler.itemgroup_lookup_id = group_lookup;
     }
 
 }
