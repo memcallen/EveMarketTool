@@ -41,7 +41,9 @@ function translateTableCol(buy, sell, props)
 	else
 		props:put("color", "none")
 	end
-		
+	
+	print(props:get("color"))
+	
 	return r
 end
 
