@@ -313,7 +313,6 @@ public class CheckBoxHandler extends Thread {
             if (curr.superparent == -1) {
                 box.setToolTipText(String.format("Id: %d, Is Super", curr.id));
             } else {
-                System.out.println(curr + ";" + curr.superparent);
                 box.setToolTipText(
                         String.format("Id: %d, Super: %s", curr.id,
                                 itemgroup_lookup_id.get(curr.superparent).name
