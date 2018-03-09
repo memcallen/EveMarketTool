@@ -33,9 +33,14 @@ public class TableCellRenderer extends DefaultTableCellRenderer {
 
         Component c = super.getTableCellRendererComponent(table,
                 value, isSelected, hasFocus, row, column);
-        
-        c.setBackground(color);
 
+        if (isSelected) {
+            c.setBackground(table.getSelectionBackground());
+            c.setForeground(table.getSelectionForeground());
+        } else {
+            c.setForeground(color);
+            c.setBackground(table.getBackground());
+        }
         return c;
 
     }

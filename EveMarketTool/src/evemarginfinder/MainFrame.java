@@ -683,6 +683,10 @@ public final class MainFrame extends javax.swing.JFrame {
 
             int[] ids = CheckBoxHandler.getItems();
 
+            if(ids == null){
+                return;
+            }
+            
             int numperquery = 20;
 
             if (ids.length > numperquery) {
@@ -859,6 +863,8 @@ public final class MainFrame extends javax.swing.JFrame {
         }
         refreshConfigVisuals();
         refreshConfigSelector();
+        
+        Configuration.stream().forEach(System.out::println);
     }//GEN-LAST:event_config_selectorActionPerformed
 
     private void open_newActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_open_newActionPerformed

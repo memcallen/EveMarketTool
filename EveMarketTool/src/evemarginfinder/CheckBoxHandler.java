@@ -14,16 +14,14 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.IntStream;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
 /**
- * TODO add author
  *
- * @author
+ * @author Memcallen Kahoudi/Recursive Pineapple
  */
 public class CheckBoxHandler extends Thread {
 
@@ -148,12 +146,10 @@ public class CheckBoxHandler extends Thread {
 
             for (Integer item : group.items) {
                 items.accept(item);
-                System.out.println("Selecting item " + item);
             }
 
             for (Integer child : group.children) {
                 groupq.push(child);
-                System.out.println("Selecting group " + child);
             }
 
         }
@@ -162,15 +158,22 @@ public class CheckBoxHandler extends Thread {
 
     public static int[] getItems() {
 
+        if(id_cache == null){
+            return null;
+        }
+        
         //id_cache is only used to store the ids, it is never returned
         int[] array = new int[id_cache.length];
         System.arraycopy(id_cache, 0, array, 0, id_cache.length);
-        System.out.println(id_cache.length + ":" + Arrays.toString(array));
         return array;
     }
 
     public static int[] getGroups() {
 
+        if(group_cache == null){
+            return null;
+        }
+        
         int[] array = new int[group_cache.length];
         System.arraycopy(group_cache, 0, array, 0, group_cache.length);
         return array;
@@ -201,8 +204,6 @@ public class CheckBoxHandler extends Thread {
     public void run() {
 
         while (!main_initialized);
-
-        System.out.println("Checkbox clicker started");
 
         while (true) {
 

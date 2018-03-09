@@ -85,12 +85,10 @@ public class QueryTranslator {
     public static class XMLLuaConfig {
 
         public final String name, file;
-        public boolean do_t_color = false;
 
-        public XMLLuaConfig(String name, String file, boolean do_color) {
+        public XMLLuaConfig(String name, String file) {
             this.name = name;
             this.file = file;
-            this.do_t_color = do_color;
         }
     }
 
@@ -110,7 +108,6 @@ public class QueryTranslator {
 
     public static XMLLuaConfig active_parser;
     public static XMLLuaConfig active_table;
-    public static boolean do_table_colors = false;
     
     public static Class[] table_classes;
 
@@ -165,10 +162,10 @@ public class QueryTranslator {
 
             switch (tag) {
                 case "query-parser":
-                    queries.add(new XMLLuaConfig(name, file, false));
+                    queries.add(new XMLLuaConfig(name, file));
                     break;
                 case "table-generator":
-                    tables.add(new XMLLuaConfig(name, file, do_color));
+                    tables.add(new XMLLuaConfig(name, file));
                     break;
                 default:
                     System.err.println("Found an incorrect tag in parser file " + file + " (" + tag + ")");
@@ -238,10 +235,7 @@ public class QueryTranslator {
 
         Objects.requireNonNull(xml);
 
-        Configuration.set("do-table-color", xml.do_t_color + "");
-
         active_table = xml;
-        do_table_colors = xml.do_t_color;
         
         QueryTranslator.reset_lua();
     }
@@ -364,7 +358,7 @@ public class QueryTranslator {
 
     public static Color getCellColors(int row, int column, List<Vector> data) {
 
-        if (Configuration.get("do-table-color").equals("true")) {
+        if (Boolean.parseBoolean(Configuration.get("do-table-color"))) {
 
             return ROW_COLORS.containsKey(data.get(row).get(0)) ? ROW_COLORS.get(data.get(row).get(0)) : null;
 
@@ -389,7 +383,7 @@ public class QueryTranslator {
             LuaValue ret;
             HashMap<String, String> props = new HashMap<>();
 
-            if (Configuration.get("do-table-color").equals("true")) {
+            if (Boolean.parseBoolean(Configuration.get("do-table-color"))) {
 
                 ret = root.get("translateTableCol")
                         .call(buy.get(i), sell.get(i), CoerceJavaToLua.coerce(props));
