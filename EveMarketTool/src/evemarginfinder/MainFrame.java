@@ -680,6 +680,11 @@ public final class MainFrame extends javax.swing.JFrame {
             } else {
                 sysid = DatabaseManager.querySystemId(sys);
             }
+            
+            if(sysid == -1){
+                JOptionPane.showMessageDialog(this, "Invalid System ID/Name", "Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
             int[] ids = CheckBoxHandler.getItems();
 
@@ -719,9 +724,9 @@ public final class MainFrame extends javax.swing.JFrame {
 
             output_table.revalidate();
 
-            output_table.repaint();
-
             output_table.doLayout();
+
+            output_table.repaint();
 
             current_query.interrupt();
         });
@@ -816,11 +821,7 @@ public final class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_parse_decoderActionPerformed
 
     private void onexit(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_onexit
-        QueryTranslator.terminate();
-        filter.saveCfg();
         
-        //Must be last
-        Configuration.close();
     }//GEN-LAST:event_onexit
 
     private void cfg_reloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_reloadActionPerformed
@@ -864,7 +865,6 @@ public final class MainFrame extends javax.swing.JFrame {
         refreshConfigVisuals();
         refreshConfigSelector();
         
-        Configuration.stream().forEach(System.out::println);
     }//GEN-LAST:event_config_selectorActionPerformed
 
     private void open_newActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_open_newActionPerformed

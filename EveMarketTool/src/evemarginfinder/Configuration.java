@@ -9,7 +9,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -42,7 +44,9 @@ public class Configuration {
     public void load() throws FileNotFoundException {
 
         try (Scanner scanner = new Scanner(new FileInputStream(file))) {
-            name = scanner.nextLine();
+            if (scanner.hasNextLine()) {
+                name = scanner.nextLine();
+            }
 
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
@@ -96,13 +100,14 @@ public class Configuration {
     static List<Configuration> configs = new ArrayList();
     static int current = 0;
     static Path root = Paths.get("./");
+    static Configuration global;
 
     public static void initialize() {
 
         File[] children = root.toFile().listFiles();
 
         ConsoleFrame.log("Looking for config files");
-        
+
         if (children != null) {
             for (File child : children) {
                 if (child.getName().endsWith(".emt.cfg")) {
@@ -123,6 +128,29 @@ public class Configuration {
             }
         }
 
+        File _global = new File("./global.cfg");
+
+        try {
+            if (!_global.exists()) {
+                _global.createNewFile();
+            }
+
+            global = new Configuration("Global", _global);
+
+            try {
+                global.load();
+            } catch (FileNotFoundException ex) {
+                ConsoleFrame.log_error("Error: Could not load global.cfg (" + ex.toString() + ")");
+            }
+
+            if (global._has("last")) {
+                System.out.println("Found initial setting - " + global._get("last"));
+                setActive(global._get("last"));
+            }
+
+        } catch (IOException ex) {
+            Logger.getLogger(Configuration.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public static void reload(String name) {
@@ -152,6 +180,13 @@ public class Configuration {
                 Logger.getLogger(Configuration.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
+
+        try {
+            global._set("last", getCName());
+            global.save();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Configuration.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
     }
 
@@ -186,10 +221,10 @@ public class Configuration {
 
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Direct Manipulation">
-    public static Stream<Entry<String, String>> stream(){
+    public static Stream<Entry<String, String>> stream() {
         return configs.get(current).cfg.entrySet().stream();
     }
-    
+
     public static void clear() {
         configs.get(current)._clear();
     }

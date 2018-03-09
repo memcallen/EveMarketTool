@@ -17,6 +17,7 @@ import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
@@ -28,7 +29,7 @@ import javax.swing.JOptionPane;
  *
  * @author Memcallen Kahoudi/Recursive Pineapple
  */
-public class DatabaseManager extends Thread{
+public class DatabaseManager extends Thread {
 
     //LOG FILE STUFF
     private static final File LOGFILE = new File("LOG-" + System.currentTimeMillis());
@@ -54,6 +55,7 @@ public class DatabaseManager extends Thread{
     public FilterFrame filterf = new FilterFrame();
 
     public static Entry<Integer, String>[] items; //I should've used a map but oh well
+    public static HashMap<Integer, ItemGroup> itemgroup_lookup = new HashMap<>();
     public static HashMap<String, Integer> systems = new HashMap<>();
     public static String itemgroupFile = "groups.txt";
     public static String itemFile = "typeid.txt";
@@ -84,7 +86,7 @@ public class DatabaseManager extends Thread{
         ConsoleFrame.log("Querying " + url);
 
         long pre = System.currentTimeMillis();
-        
+
         JsonElement response;
 
         try {
@@ -98,13 +100,13 @@ public class DatabaseManager extends Thread{
 
         ConsoleFrame.log("Received response in " + (System.currentTimeMillis() - pre) + "ms");
         ConsoleFrame.log("Translating response");
-        
+
         pre = System.currentTimeMillis();
-        
+
         List<Vector> out = QueryTranslator.getTableData(QueryTranslator.translate(itemid, response));
-        
+
         ConsoleFrame.log("Translated in " + (System.currentTimeMillis() - pre) + "ms");
-        
+
         return out;
     }
 
@@ -208,16 +210,46 @@ public class DatabaseManager extends Thread{
 
         groups = temp.toArray(new ItemGroup[temp.size()]);
 
+        LinkedList<ItemGroup> unresolved = new LinkedList<>();
+        
+        while(!unresolved.isEmpty()){
+            
+        }
+        
         ConsoleFrame.log("Loaded Groups in " + (System.currentTimeMillis() - pre) + " millis");
 
         //initilize front-end
         loadItems();
         loadSystems();
 
+        ConsoleFrame.log("Resolving Supers");
+        
+        for (ItemGroup ig : groups) {
+            itemgroup_lookup.put(ig.id, ig);
+        }
+        
+        for(ItemGroup ig : groups) {
+            if(ig.parent != -1) {
+                
+                int sp = ig.parent;
+                ItemGroup curr = itemgroup_lookup.get(sp);
+                
+                while(curr.parent != -1){
+                    if(curr.superparent != -1){
+                        sp = curr.superparent;
+                        break;
+                    }
+                    curr = itemgroup_lookup.get(sp = curr.parent);
+                }
+                
+                ig.superparent = sp;
+            }
+        }
+        
         ConsoleFrame.log("Loading CheckBoxHandler");
-        
-        CheckBoxHandler.setData(groups, items);
-        
+
+        CheckBoxHandler.setData(groups, items, itemgroup_lookup);
+
         Entry<Integer, String>[] entries_groups = new Entry[temp.size()];
 
         for (int i = 0; i < groups.length; i++) {
@@ -226,50 +258,58 @@ public class DatabaseManager extends Thread{
         }
 
         ConsoleFrame.log("Loading Main Interface");
-        
+
         gui = new MainFrame(entries_groups, items, filterf);
 
         gui.setVisible(true);
 
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            QueryTranslator.terminate();
+            filterf.saveCfg();
+
+            //Must be last
+            Configuration.close();
+        }));
+
     }
 
     @Override
-    public void run(){
-        
-            Configuration.initialize();
-            
-            QueryTranslator.initialize();
+    public void run() {
 
-            CheckBoxHandler.initialize();
-            
-            filterf = new FilterFrame();
-            filterf.loadCfg();
-            QueryTranslator.setFilter(filterf);
-            
-            QueryTranslator.reset_lua();
+        Configuration.initialize();
 
-            ConsoleFrame.log("Initing stuff");
+        QueryTranslator.initialize();
 
+        CheckBoxHandler.initialize();
+
+        filterf = new FilterFrame();
+        filterf.loadCfg();
+        QueryTranslator.setFilter(filterf);
+
+        QueryTranslator.reset_lua();
+
+        ConsoleFrame.log("Initing stuff");
+
+        try {
+            initialize();
+        } catch (FileNotFoundException ex) {
+            ConsoleFrame.log("Error initializing database manager: " + ex.getMessage());
+            return;
+        }
+
+        ConsoleFrame.log("Finished loading data, showing window");
+
+        ConsoleFrame.log("Starting selector loop");
+
+        while (true) {
             try {
-                initialize();
-            } catch (FileNotFoundException ex) {
-                ConsoleFrame.log("Error initializing database manager: " + ex.getMessage());
-                return;
+                Thread.sleep(1000);//infinite sleep because I'm not sure what to do here
+            } catch (InterruptedException ex) {
             }
-
-            ConsoleFrame.log("Finished loading data, showing window");
-
-            ConsoleFrame.log("Starting selector loop");
-
-            while(true){
-                try {
-                    Thread.sleep(1000);//infinite sleep because I'm not sure what to do here
-                } catch (InterruptedException ex) {
-                }
-            }
+        }
 
     }
-    
+
     public static void main(String[] args) {
 
         if (!LOGFILE.exists()) {
