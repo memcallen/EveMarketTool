@@ -1,5 +1,3 @@
-#README is WIP
-
 # EveMarketTool
 
 EveMarketTool is an application to bulk-price check items, which can be specified individually or by group, for the game Eve Online.
@@ -77,7 +75,7 @@ Region & Station Format
 This section specifies the defined methods and default APIs available to the lua script files
 EveMarketTool uses LuaJ to parse and run the lua scripts. Currently, the default APIs are based off of LuaJ's JsePlatform.standardGlobals, but this will most likely change due to security reasons.
 
-Default APIs:
+#### Default APIs:
  - JseBase
  - Package
  - Bit32
@@ -97,6 +95,14 @@ Table<Integer> getTypes()
 
 String getItemName(Integer typeid)
  - Returns the Item Name from its typeid
+
+String filter:get(String)
+ - Gets a property from the filter window
+ - Returns nil if none found
+
+void filter:set(String, String)
+ - Sets a property for the filter window
+ - Properties are global unless EveMarketTool restarted
 
 ### Required Lua Methods
 
@@ -128,11 +134,3 @@ Table translateTableCol(buy object, sell object, HashMap<String, String> propert
     - color: the cell color (required for colors)
        - Is the plaintext color (ie red, blue, green, etc)
  - Returns same as translateTable
-
-String filter:get(String)
- - Gets a property from the filter window
- - Returns nil if none found
-
-void filter:set(String, String)
- - Sets a property for the filter window
- - Properties are global unless EveMarketTool restarted
