@@ -14,7 +14,9 @@ EveMarketTool will run on almost all machines. Recommended minimum ram is 4 Giga
 
 
 
-![First Tab Image](https://raw.githubusercontent.com/memcallen/EveMarketTool/branch/path/to/img.png)
+![First Tab Image](EveMarketTool/docs/images/firsttabscreenshot.png)
+
+![First Tab Image](https://raw.githubusercontent.com/memcallen/EveMarketTool/master/docs/images/firsttabscreenshot.png)
 
 The first tab indicates the items you would like to query
  - Select item groups with the left panel
