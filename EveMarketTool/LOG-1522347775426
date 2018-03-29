@@ -1,0 +1,304 @@
+2018-03-29T18:22:55.707Z:Looking for config files
+
+2018-03-29T18:22:55.754Z:Found evemarketer.emt.cfg
+
+2018-03-29T18:22:55.785Z:Found Fuzzworks.emt.cfg
+
+2018-03-29T18:22:55.942Z:Initing stuff
+
+2018-03-29T18:22:56.004Z:Loaded Groups in 63 millis
+
+2018-03-29T18:22:56.035Z:Loaded Items in 47 millis
+
+2018-03-29T18:22:56.067Z:Loaded Systems in 31 millis
+
+2018-03-29T18:22:56.098Z:Resolving Supers
+
+2018-03-29T18:22:56.129Z:Loading CheckBoxHandler
+
+2018-03-29T18:22:56.160Z:Loading Main Interface
+
+2018-03-29T18:22:56.192Z:Loading laf
+
+2018-03-29T18:22:56.212Z:Doing table stuff
+
+2018-03-29T18:22:56.233Z:Initing components
+
+2018-03-29T18:22:56.373Z:Initing Check Boxes
+
+2018-03-29T18:22:56.405Z:Checkboxes - Initing stuff
+
+2018-03-29T18:22:56.436Z:Checkboxes - Doing Groups
+
+2018-03-29T18:22:56.467Z:Checkboxes - Group:0%
+
+2018-03-29T18:22:56.498Z:Checkboxes - Group:5%
+
+2018-03-29T18:22:56.530Z:Checkboxes - Group:10%
+
+2018-03-29T18:22:56.561Z:Checkboxes - Group:15%
+
+2018-03-29T18:22:56.592Z:Checkboxes - Group:20%
+
+2018-03-29T18:22:56.623Z:Checkboxes - Group:25%
+
+2018-03-29T18:22:56.655Z:Checkboxes - Group:30%
+
+2018-03-29T18:22:56.702Z:Checkboxes - Group:35%
+
+2018-03-29T18:22:56.733Z:Checkboxes - Group:40%
+
+2018-03-29T18:22:56.764Z:Checkboxes - Group:45%
+
+2018-03-29T18:22:56.795Z:Checkboxes - Group:50%
+
+2018-03-29T18:22:56.827Z:Checkboxes - Group:55%
+
+2018-03-29T18:22:56.858Z:Checkboxes - Group:60%
+
+2018-03-29T18:22:56.889Z:Checkboxes - Group:65%
+
+2018-03-29T18:22:56.920Z:Checkboxes - Group:70%
+
+2018-03-29T18:22:56.952Z:Checkboxes - Group:75%
+
+2018-03-29T18:22:56.983Z:Checkboxes - Group:80%
+
+2018-03-29T18:22:57.014Z:Checkboxes - Group:85%
+
+2018-03-29T18:22:57.045Z:Checkboxes - Group:90%
+
+2018-03-29T18:22:57.108Z:Checkboxes - Group:95%
+
+2018-03-29T18:22:57.155Z:Checkboxes - Group:100%
+
+2018-03-29T18:22:57.186Z:Created Checkboxes:Groups in 172 millis
+
+2018-03-29T18:22:57.217Z:Checkboxes - Doing Items
+
+2018-03-29T18:22:57.248Z:Checkboxes - Item:0%
+
+2018-03-29T18:22:57.280Z:Checkboxes - Item:5%
+
+2018-03-29T18:22:57.311Z:Checkboxes - Item:10%
+
+2018-03-29T18:22:57.342Z:Checkboxes - Item:15%
+
+2018-03-29T18:22:57.374Z:Checkboxes - Item:20%
+
+2018-03-29T18:22:57.420Z:Checkboxes - Item:25%
+
+2018-03-29T18:22:57.467Z:Checkboxes - Item:30%
+
+2018-03-29T18:22:57.499Z:Checkboxes - Item:35%
+
+2018-03-29T18:22:57.530Z:Checkboxes - Item:40%
+
+2018-03-29T18:22:57.561Z:Checkboxes - Item:45%
+
+2018-03-29T18:22:57.592Z:Checkboxes - Item:50%
+
+2018-03-29T18:22:57.624Z:Checkboxes - Item:55%
+
+2018-03-29T18:22:57.655Z:Checkboxes - Item:60%
+
+2018-03-29T18:22:57.686Z:Checkboxes - Item:65%
+
+2018-03-29T18:22:57.717Z:Checkboxes - Item:70%
+
+2018-03-29T18:22:57.749Z:Checkboxes - Item:75%
+
+2018-03-29T18:22:57.780Z:Checkboxes - Item:80%
+
+2018-03-29T18:22:57.811Z:Checkboxes - Item:85%
+
+2018-03-29T18:22:57.842Z:Checkboxes - Item:90%
+
+2018-03-29T18:22:57.874Z:Checkboxes - Item:95%
+
+2018-03-29T18:22:57.905Z:Checkboxes - Item:100%
+
+2018-03-29T18:22:57.936Z:Checkboxes - Item:100%
+
+2018-03-29T18:22:57.967Z:Created Checkboxes:Items in 672 millis
+
+2018-03-29T18:22:57.999Z:Loading ConfigBox Model
+
+2018-03-29T18:22:58.030Z:Packing
+
+2018-03-29T18:22:58.061Z:Finished loading data, showing window
+
+2018-03-29T18:22:58.092Z:Starting selector loop
+
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+	at evemarginfinder.MainFrame.selected_items_refreshActionPerformed(MainFrame.java:521)
+	at evemarginfinder.MainFrame.access$600(MainFrame.java:25)
+	at evemarginfinder.MainFrame$8.actionPerformed(MainFrame.java:255)
+	at javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:2022)
+	at javax.swing.AbstractButton$Handler.actionPerformed(AbstractButton.java:2348)
+	at javax.swing.DefaultButtonModel.fireActionPerformed(DefaultButtonModel.java:402)
+	at javax.swing.DefaultButtonModel.setPressed(DefaultButtonModel.java:259)
+	at javax.swing.AbstractButton.doClick(AbstractButton.java:376)
+	at javax.swing.AbstractButton.doClick(AbstractButton.java:356)
+	at evemarginfinder.MainFrame.TabbedPaneStateChanged(MainFrame.java:513)
+	at evemarginfinder.MainFrame.access$100(MainFrame.java:25)
+	at evemarginfinder.MainFrame$3.stateChanged(MainFrame.java:175)
+	at javax.swing.JTabbedPane.fireStateChanged(JTabbedPane.java:416)
+	at javax.swing.JTabbedPane$ModelListener.stateChanged(JTabbedPane.java:270)
+	at javax.swing.DefaultSingleSelectionModel.fireStateChanged(DefaultSingleSelectionModel.java:132)
+	at javax.swing.DefaultSingleSelectionModel.setSelectedIndex(DefaultSingleSelectionModel.java:67)
+	at javax.swing.JTabbedPane.setSelectedIndexImpl(JTabbedPane.java:616)
+	at javax.swing.JTabbedPane.setSelectedIndex(JTabbedPane.java:591)
+	at javax.swing.plaf.basic.BasicTabbedPaneUI$Handler.mousePressed(BasicTabbedPaneUI.java:3647)
+	at javax.swing.plaf.synth.SynthTabbedPaneUI$1.mousePressed(SynthTabbedPaneUI.java:312)
+	at java.awt.Component.processMouseEvent(Component.java:6530)
+	at javax.swing.JComponent.processMouseEvent(JComponent.java:3324)
+	at java.awt.Component.processEvent(Component.java:6298)
+	at java.awt.Container.processEvent(Container.java:2236)
+	at java.awt.Component.dispatchEventImpl(Component.java:4889)
+	at java.awt.Container.dispatchEventImpl(Container.java:2294)
+	at java.awt.Component.dispatchEvent(Component.java:4711)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4888)
+	at java.awt.LightweightDispatcher.processMouseEvent(Container.java:4522)
+	at java.awt.LightweightDispatcher.dispatchEvent(Container.java:4466)
+	at java.awt.Container.dispatchEventImpl(Container.java:2280)
+	at java.awt.Window.dispatchEventImpl(Window.java:2746)
+	at java.awt.Component.dispatchEvent(Component.java:4711)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:758)
+	at java.awt.EventQueue.access$500(EventQueue.java:97)
+	at java.awt.EventQueue$3.run(EventQueue.java:709)
+	at java.awt.EventQueue$3.run(EventQueue.java:703)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:80)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:90)
+	at java.awt.EventQueue$4.run(EventQueue.java:731)
+	at java.awt.EventQueue$4.run(EventQueue.java:729)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:80)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:728)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:201)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:116)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:105)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:93)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:82)
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+	at evemarginfinder.MainFrame.selected_items_refreshActionPerformed(MainFrame.java:521)
+	at evemarginfinder.MainFrame.access$600(MainFrame.java:25)
+	at evemarginfinder.MainFrame$8.actionPerformed(MainFrame.java:255)
+	at javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:2022)
+	at javax.swing.AbstractButton$Handler.actionPerformed(AbstractButton.java:2348)
+	at javax.swing.DefaultButtonModel.fireActionPerformed(DefaultButtonModel.java:402)
+	at javax.swing.DefaultButtonModel.setPressed(DefaultButtonModel.java:259)
+	at javax.swing.AbstractButton.doClick(AbstractButton.java:376)
+	at javax.swing.AbstractButton.doClick(AbstractButton.java:356)
+	at evemarginfinder.MainFrame.TabbedPaneStateChanged(MainFrame.java:513)
+	at evemarginfinder.MainFrame.access$100(MainFrame.java:25)
+	at evemarginfinder.MainFrame$3.stateChanged(MainFrame.java:175)
+	at javax.swing.JTabbedPane.fireStateChanged(JTabbedPane.java:416)
+	at javax.swing.JTabbedPane$ModelListener.stateChanged(JTabbedPane.java:270)
+	at javax.swing.DefaultSingleSelectionModel.fireStateChanged(DefaultSingleSelectionModel.java:132)
+	at javax.swing.DefaultSingleSelectionModel.setSelectedIndex(DefaultSingleSelectionModel.java:67)
+	at javax.swing.JTabbedPane.setSelectedIndexImpl(JTabbedPane.java:616)
+	at javax.swing.JTabbedPane.setSelectedIndex(JTabbedPane.java:591)
+	at javax.swing.plaf.basic.BasicTabbedPaneUI$Handler.mousePressed(BasicTabbedPaneUI.java:3647)
+	at javax.swing.plaf.synth.SynthTabbedPaneUI$1.mousePressed(SynthTabbedPaneUI.java:312)
+	at java.awt.Component.processMouseEvent(Component.java:6530)
+	at javax.swing.JComponent.processMouseEvent(JComponent.java:3324)
+	at java.awt.Component.processEvent(Component.java:6298)
+	at java.awt.Container.processEvent(Container.java:2236)
+	at java.awt.Component.dispatchEventImpl(Component.java:4889)
+	at java.awt.Container.dispatchEventImpl(Container.java:2294)
+	at java.awt.Component.dispatchEvent(Component.java:4711)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4888)
+	at java.awt.LightweightDispatcher.processMouseEvent(Container.java:4522)
+	at java.awt.LightweightDispatcher.dispatchEvent(Container.java:4466)
+	at java.awt.Container.dispatchEventImpl(Container.java:2280)
+	at java.awt.Window.dispatchEventImpl(Window.java:2746)
+	at java.awt.Component.dispatchEvent(Component.java:4711)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:758)
+	at java.awt.EventQueue.access$500(EventQueue.java:97)
+	at java.awt.EventQueue$3.run(EventQueue.java:709)
+	at java.awt.EventQueue$3.run(EventQueue.java:703)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:80)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:90)
+	at java.awt.EventQueue$4.run(EventQueue.java:731)
+	at java.awt.EventQueue$4.run(EventQueue.java:729)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:80)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:728)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:201)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:116)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:105)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:93)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:82)
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+	at evemarginfinder.MainFrame.selected_items_refreshActionPerformed(MainFrame.java:521)
+	at evemarginfinder.MainFrame.access$600(MainFrame.java:25)
+	at evemarginfinder.MainFrame$8.actionPerformed(MainFrame.java:255)
+	at javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:2022)
+	at javax.swing.AbstractButton$Handler.actionPerformed(AbstractButton.java:2348)
+	at javax.swing.DefaultButtonModel.fireActionPerformed(DefaultButtonModel.java:402)
+	at javax.swing.DefaultButtonModel.setPressed(DefaultButtonModel.java:259)
+	at javax.swing.AbstractButton.doClick(AbstractButton.java:376)
+	at javax.swing.AbstractButton.doClick(AbstractButton.java:356)
+	at evemarginfinder.MainFrame.TabbedPaneStateChanged(MainFrame.java:513)
+	at evemarginfinder.MainFrame.access$100(MainFrame.java:25)
+	at evemarginfinder.MainFrame$3.stateChanged(MainFrame.java:175)
+	at javax.swing.JTabbedPane.fireStateChanged(JTabbedPane.java:416)
+	at javax.swing.JTabbedPane$ModelListener.stateChanged(JTabbedPane.java:270)
+	at javax.swing.DefaultSingleSelectionModel.fireStateChanged(DefaultSingleSelectionModel.java:132)
+	at javax.swing.DefaultSingleSelectionModel.setSelectedIndex(DefaultSingleSelectionModel.java:67)
+	at javax.swing.JTabbedPane.setSelectedIndexImpl(JTabbedPane.java:616)
+	at javax.swing.JTabbedPane.setSelectedIndex(JTabbedPane.java:591)
+	at javax.swing.plaf.basic.BasicTabbedPaneUI$Handler.mousePressed(BasicTabbedPaneUI.java:3647)
+	at javax.swing.plaf.synth.SynthTabbedPaneUI$1.mousePressed(SynthTabbedPaneUI.java:312)
+	at java.awt.Component.processMouseEvent(Component.java:6530)
+	at javax.swing.JComponent.processMouseEvent(JComponent.java:3324)
+	at java.awt.Component.processEvent(Component.java:6298)
+	at java.awt.Container.processEvent(Container.java:2236)
+	at java.awt.Component.dispatchEventImpl(Component.java:4889)
+	at java.awt.Container.dispatchEventImpl(Container.java:2294)
+	at java.awt.Component.dispatchEvent(Component.java:4711)
+	at java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4888)
+	at java.awt.LightweightDispatcher.processMouseEvent(Container.java:4522)
+	at java.awt.LightweightDispatcher.dispatchEvent(Container.java:4466)
+	at java.awt.Container.dispatchEventImpl(Container.java:2280)
+	at java.awt.Window.dispatchEventImpl(Window.java:2746)
+	at java.awt.Component.dispatchEvent(Component.java:4711)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:758)
+	at java.awt.EventQueue.access$500(EventQueue.java:97)
+	at java.awt.EventQueue$3.run(EventQueue.java:709)
+	at java.awt.EventQueue$3.run(EventQueue.java:703)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:80)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:90)
+	at java.awt.EventQueue$4.run(EventQueue.java:731)
+	at java.awt.EventQueue$4.run(EventQueue.java:729)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:80)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:728)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:201)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:116)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:105)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:93)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:82)
+2018-03-29T18:23:05.446Z:Querying https://market.fuzzwork.co.uk/aggregates/?types=587,589,590,591,592,593,594,597,598,599,602,603,605,607,608,609,2161,3766,29248,32880&station=60003760
+
+2018-03-29T18:23:06.336Z:Received response in 891ms
+
+2018-03-29T18:23:06.368Z:Translating response
+
+2018-03-29T18:23:06.399Z:Translated in 0ms
+
+2018-03-29T18:23:06.430Z:Querying https://market.fuzzwork.co.uk/aggregates/?types=582,583,584,585,586&station=60003760
+
+2018-03-29T18:23:06.711Z:Received response in 359ms
+
+2018-03-29T18:23:06.743Z:Translating response
+
+2018-03-29T18:23:06.774Z:Translated in 16ms
+

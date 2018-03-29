@@ -48,7 +48,7 @@ public class QueryTranslator {
         public int[] types;
 
         public getTypes(int... types) {
-            this.types = types;
+            this.types = types == null ? new int[0] : types;
         }
 
         @Override
@@ -433,6 +433,19 @@ public class QueryTranslator {
         return ret;
     }
 
+    public static String getURL(int[] itemids, int systemid, boolean is_system) {
+        
+        typeFunc.types = itemids;
+        
+        LuaValue ret = root.get("getURL").call(CoerceJavaToLua.coerce(systemid), CoerceJavaToLua.coerce(is_system));
+        
+        if(!ret.isstring()) {
+            throw new LuaError("getURL returned non-string");
+        }
+        
+        return ret.checkjstring();
+    }
+    
     public static void setFilter(FilterFrame filter){
         filters = filter; 
     }

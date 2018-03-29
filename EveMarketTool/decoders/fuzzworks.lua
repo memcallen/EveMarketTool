@@ -1,4 +1,39 @@
 
+function getURL(sysid, system)
+	url = "https://market.fuzzwork.co.uk/aggregates/?types="
+	
+	types = ""
+	
+	t = getTypes()
+	size = 0
+	
+	for _ in pairs(t) do
+		size = size + 1
+	end
+	
+	for i, v in pairs(t) do
+		
+        if i == size then
+            c = '&'
+        else
+           c = ','
+        end
+        
+		types = types .. string.format('%d%s', t[i], c)
+		
+	end
+	
+	url = url .. types
+	
+	if system then
+		url = url .. "region=" .. sysid
+	else
+		url = url .. "station=" .. sysid
+	end
+	
+	return url
+end
+
 function convert(id, root)
 	
 	return {

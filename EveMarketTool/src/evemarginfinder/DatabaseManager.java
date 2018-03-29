@@ -62,25 +62,9 @@ public class DatabaseManager extends Thread {
 
     public static JsonParser parser = new JsonParser();
 
-    public static String getQueryURL(int[] itemids, int loc, boolean stat) {
-        String out = Configuration.get("uformat");
-
-        out = out.replace("{0}", Configuration.get("url"));
-
-        String typef = Configuration.get("type");
-
-        String types = Configuration.get("typeroot").replace("{0}",
-                IntStream.of(itemids).mapToObj(i -> typef.replace("{0}", Integer.toString(i))).reduce("", String::concat)
-        );
-
-        String location = Configuration.get(stat ? "station" : "region").replace("{0}", Integer.toString(loc));
-
-        return out.replace("{1}", types).replace("{2}", location);
-    }
-
     public static List<Vector> getMarketInfoBulk(int[] itemid, int sysid) throws IOException {
 
-        String url = getQueryURL(itemid, sysid, false);
+        String url = QueryTranslator.getURL(itemid, sysid, false);
 
         ConsoleFrame.log("Querying " + url);
 
