@@ -96,9 +96,8 @@ public class CheckBoxHandler extends Thread {
     private static void checkSelections() {
         //adds items
         if (!item_queue.isEmpty()) {
-            Integer id;
             while (!item_queue.isEmpty()) {
-                item_selection.add(id = item_queue.poll());
+                item_selection.add(item_queue.poll());
             }
             items_changed = true;
         }
@@ -107,25 +106,23 @@ public class CheckBoxHandler extends Thread {
         if (!group_queue.isEmpty()) {
             Integer id;
             while (!group_queue.isEmpty()) {
-                group_selection.add(id = group_queue.poll());
+                group_selection.add(group_queue.poll());
             }
             items_changed = true;
         }
 
         //removes items
         if (!item_queue_des.isEmpty()) {
-            Integer id;
             while (!item_queue_des.isEmpty()) {
-                item_selection.remove(id = item_queue_des.poll());
+                item_selection.remove(item_queue_des.poll());
             }
             items_changed = true;
         }
 
         //removes groups
         if (!group_queue_des.isEmpty()) {
-            Integer id;
             while (!group_queue_des.isEmpty()) {
-                group_selection.remove(id = group_queue_des.poll());
+                group_selection.remove(group_queue_des.poll());
             }
             items_changed = true;
         }
@@ -203,7 +200,9 @@ public class CheckBoxHandler extends Thread {
     @SuppressWarnings("empty-statement")
     public void run() {
 
-        while (!main_initialized);
+        while (!main_initialized){
+            Thread.yield();
+        }
 
         while (true) {
 
