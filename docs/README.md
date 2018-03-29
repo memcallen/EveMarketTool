@@ -55,20 +55,7 @@ The third tab is for configuring the api website and formatting for the url
 
 # API URL Configuration
 
-This section is only relevant if fuzzworks has stopped its service, or if you want to configure EveMarketTool to use another api. It is based off of the Python method for string formatting
-
-URL Format
- - {0} is the root url (Specified by the URL field)
- - {1} is the typeid section (Generated via the TypeID section)
- - {2} is the region or station format (Specified via the Region & Station fields)
-
-TypeID Format
- - The first field is the root for the TypeID string
- - The second string specifies the format for each typeid - This is repeated for each typeid
-
-Region & Station Format
- - These fields are used with the Station/Region field in the Info tab
-   - Currently, this functionality is hardcoded to use the station field
+EveMarketTool's URL formatting is now done in the query decoder files to allow the url to be constructed by logic, rather than string formatting.
 
 # LUA API
 
@@ -105,6 +92,14 @@ void filter:set(String, String)
  - Properties are global unless EveMarketTool restarted
 
 ### Required Lua Methods
+
+String getURL(int sysid, boolean system)
+ - Creates a url for the current decoder
+ - sysid is the current system or region id
+ - system
+   - True:  user wants to check system market
+   - False: user wants to check region/station market
+ - Returns a string, which is directly queried
 
 Table translate(Userdata json)
  - The json parameter is the root element from the actual response, see [Gson @ JsonElement](https://github.com/google/gson/blob/master/gson/src/main/java/com/google/gson/JsonElement.java) for its methods
