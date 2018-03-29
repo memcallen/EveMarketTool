@@ -2,6 +2,7 @@ package evemarginfinder;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.Vector;
@@ -9,11 +10,13 @@ import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.event.ChangeEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import org.luaj.vm2.LuaError;
 
 /**
  *
@@ -37,8 +40,9 @@ public final class MainFrame extends javax.swing.JFrame {
 
     private static Thread current_query;
 
+    @SuppressWarnings("FieldMayBeFinal")
     private FilterFrame filter;
-    
+
     public MainFrame(Entry<Integer, String>[] entries_groups, Entry<Integer, String>[] entries_items, FilterFrame filter) {
 
         ConsoleFrame.log("Loading laf");
@@ -66,6 +70,16 @@ public final class MainFrame extends javax.swing.JFrame {
 
         ConsoleFrame.log("Initing components");
         initComponents();
+
+        ItemGroupPanel.setLayout(new OptimizedScrollPaneLayout(GroupScroll.getViewport()::getViewRect));
+        GroupScroll.getViewport().addChangeListener((ChangeEvent e) -> {
+            GroupScroll.getViewport().revalidate();
+        });
+
+        ItemPanel.setLayout(new OptimizedScrollPaneLayout(ItemScroll.getViewport()::getViewRect));
+        ItemScroll.getViewport().addChangeListener((ChangeEvent e) -> {
+            ItemScroll.getViewport().revalidate();
+        });
 
         TableColumnModel tcm = output_table.getColumnModel();
 
@@ -615,7 +629,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private void deselectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deselectActionPerformed
 
         CheckBoxHandler.deselectAll();
-        
+
     }//GEN-LAST:event_deselectActionPerformed
 
     private void ItemGroupSearchKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ItemGroupSearchKeyTyped
@@ -658,6 +672,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
     }//GEN-LAST:event_selected_items_refreshActionPerformed
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void load_itemsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_load_itemsActionPerformed
 
         if (current_query != null) {
@@ -680,18 +695,18 @@ public final class MainFrame extends javax.swing.JFrame {
             } else {
                 sysid = DatabaseManager.querySystemId(sys);
             }
-            
-            if(sysid == -1){
+
+            if (sysid == -1) {
                 JOptionPane.showMessageDialog(this, "Invalid System ID/Name", "Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             int[] ids = CheckBoxHandler.getItems();
 
-            if(ids == null){
+            if (ids == null) {
                 return;
             }
-            
+
             int numperquery = 20;
 
             if (ids.length > numperquery) {
@@ -704,9 +719,20 @@ public final class MainFrame extends javax.swing.JFrame {
 
                     try {
                         output_table_data.addAll(DatabaseManager.getMarketInfoBulk(subids, sysid));
-                    } catch (Exception e) {
+                    } catch (LuaError e) {
                         e.printStackTrace();
-                        JOptionPane.showMessageDialog(this, "Error getting data from api", e.toString(), JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null,
+                                e.getMessage().length() > 100 ? e.getMessage().substring(0, 100) + "..." : e.getMessage(),
+                                "Error in lua script", JOptionPane.ERROR_MESSAGE);
+                        ConsoleFrame.log_error(e.getMessage());
+                        break;
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        JOptionPane.showMessageDialog(null,
+                                e.getMessage().length() > 100 ? e.getMessage().substring(0, 100) + "..." : e.getMessage(),
+                                "Error Connecting to API", JOptionPane.ERROR_MESSAGE);
+                        ConsoleFrame.log_error(e.getMessage());
                         break;
                     }
 
@@ -715,7 +741,26 @@ public final class MainFrame extends javax.swing.JFrame {
                 }
 
             } else {
-                output_table_data.addAll(DatabaseManager.getMarketInfoBulk(ids, sysid));
+
+                try {
+                    output_table_data.addAll(DatabaseManager.getMarketInfoBulk(ids, sysid));
+                } catch (LuaError e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(null,
+                            e.getMessage().length() > 100 ? e.getMessage().substring(0, 100) + "..." : e.getMessage(),
+                            "Error in lua script", JOptionPane.ERROR_MESSAGE);
+                    ConsoleFrame.log_error(e.getMessage());
+                    return;
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(null,
+                            e.getMessage().length() > 100 ? e.getMessage().substring(0, 100) + "..." : e.getMessage(),
+                            "Error Connecting to API", JOptionPane.ERROR_MESSAGE);
+                    ConsoleFrame.log_error(e.getMessage());
+                    return;
+                }
+
             }
 
             if (rem_inv.isSelected()) {
@@ -821,7 +866,7 @@ public final class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_parse_decoderActionPerformed
 
     private void onexit(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_onexit
-        
+
     }//GEN-LAST:event_onexit
 
     private void cfg_reloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_reloadActionPerformed
@@ -864,7 +909,7 @@ public final class MainFrame extends javax.swing.JFrame {
         }
         refreshConfigVisuals();
         refreshConfigSelector();
-        
+
     }//GEN-LAST:event_config_selectorActionPerformed
 
     private void open_newActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_open_newActionPerformed
@@ -938,33 +983,33 @@ public final class MainFrame extends javax.swing.JFrame {
         cfg_stat.setText(Configuration.get("station"));
 
         int index = 0;
-        
+
         parse_decoder.removeAllItems();
-        
-        for(int i = 0; i < QueryTranslator.query_parsers.size(); i++){
+
+        for (int i = 0; i < QueryTranslator.query_parsers.size(); i++) {
             QueryTranslator.XMLLuaConfig xml = QueryTranslator.query_parsers.get(i);
             parse_decoder.addItem(xml.name);
-            if(xml.name.equals(Configuration.get("query-parser"))){
+            if (xml.name.equals(Configuration.get("query-parser"))) {
                 index = i;
             }
         }
-        
+
         parse_decoder.setSelectedIndex(index);
-        
+
         index = 0;
-        
+
         parse_table.removeAllItems();
 
-        for(int i = 0; i < QueryTranslator.table_generators.size(); i++){
+        for (int i = 0; i < QueryTranslator.table_generators.size(); i++) {
             QueryTranslator.XMLLuaConfig xml = QueryTranslator.table_generators.get(i);
             parse_table.addItem(xml.name);
-            if(xml == QueryTranslator.active_table){
+            if (xml == QueryTranslator.active_table) {
                 index = i;
             }
         }
-        
+
         parse_table.setSelectedIndex(index);
-        
+
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
