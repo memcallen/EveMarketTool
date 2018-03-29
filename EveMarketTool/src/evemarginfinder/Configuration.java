@@ -11,7 +11,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -151,6 +151,14 @@ public class Configuration {
         } catch (IOException ex) {
             Logger.getLogger(Configuration.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        if(configs.isEmpty()) {
+            JOptionPane.showMessageDialog(null, 
+                    "No Configurations found, try redownloading the program"
+                    , "No Configurations Found", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+        }
+        
     }
 
     public static void reload(String name) {
@@ -230,6 +238,9 @@ public class Configuration {
     }
 
     public static boolean has(String key) {
+        if(configs.isEmpty()){
+            return false;
+        }
         return configs.get(current)._has(key);
     }
 
