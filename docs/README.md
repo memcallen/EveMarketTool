@@ -42,6 +42,7 @@ The third tab is for configuring the api website and formatting for the url
 
  - Generic Table implements a generic table with coloring
  - In order for coloring to work, you must specify one of the following filters:
+ - Note: Minimum_Margin no longer needs to be specified, and the default can be found in the .emt.cfg file for the current decoder (can be freely edited, so long as it is a decimal percent)
    - Maximum_Price
      - In ISK
    - Minimum_Margin
