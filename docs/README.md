@@ -120,6 +120,8 @@ Table translateTable(buy object, sell object)
  - buy and sell are the same format that was returned from translate
  - Returns a table which contains the data for each of the table headers
 
+### Optional Lua Methods
+
 Table translateTableCol(buy object, sell object, HashMap<String, String> properties)
  - Translates a set of buy and sell objects into a row for the table
  - Only enabled if the config's do-table-color == true
