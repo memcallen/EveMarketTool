@@ -78,8 +78,6 @@ public class FilterFrame extends javax.swing.JFrame {
         filter.revalidate();
         filter.repaint();
         
-        System.out.println(filter.getComponents().length);
-        
         return p;
     }
     

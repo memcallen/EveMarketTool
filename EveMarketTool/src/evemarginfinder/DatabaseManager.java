@@ -23,7 +23,6 @@ import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Vector;
 import java.util.stream.IntStream;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -79,7 +78,7 @@ public class DatabaseManager extends Thread {
         return out.replace("{1}", types).replace("{2}", location);
     }
 
-    public static List<Vector> getMarketInfoBulk(int[] itemid, int sysid) {
+    public static List<Vector> getMarketInfoBulk(int[] itemid, int sysid) throws IOException {
 
         String url = getQueryURL(itemid, sysid, false);
 
@@ -89,14 +88,7 @@ public class DatabaseManager extends Thread {
 
         JsonElement response;
 
-        try {
-            response = read(url);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null,
-                    e.getMessage().length() > 100 ? e.getMessage().substring(0, 100) + "..." : e.getMessage(),
-                    "Error Connecting to API", JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
+        response = read(url);
 
         ConsoleFrame.log("Received response in " + (System.currentTimeMillis() - pre) + "ms");
         ConsoleFrame.log("Translating response");
@@ -210,12 +202,6 @@ public class DatabaseManager extends Thread {
 
         groups = temp.toArray(new ItemGroup[temp.size()]);
 
-        LinkedList<ItemGroup> unresolved = new LinkedList<>();
-        
-        while(!unresolved.isEmpty()){
-            
-        }
-        
         ConsoleFrame.log("Loaded Groups in " + (System.currentTimeMillis() - pre) + " millis");
 
         //initilize front-end
@@ -223,29 +209,29 @@ public class DatabaseManager extends Thread {
         loadSystems();
 
         ConsoleFrame.log("Resolving Supers");
-        
+
         for (ItemGroup ig : groups) {
             itemgroup_lookup.put(ig.id, ig);
         }
-        
-        for(ItemGroup ig : groups) {
-            if(ig.parent != -1) {
-                
+
+        for (ItemGroup ig : groups) {
+            if (ig.parent != -1) {
+
                 int sp = ig.parent;
                 ItemGroup curr = itemgroup_lookup.get(sp);
-                
-                while(curr.parent != -1){
-                    if(curr.superparent != -1){
+
+                while (curr.parent != -1) {
+                    if (curr.superparent != -1) {
                         sp = curr.superparent;
                         break;
                     }
                     curr = itemgroup_lookup.get(sp = curr.parent);
                 }
-                
+
                 ig.superparent = sp;
             }
         }
-        
+
         ConsoleFrame.log("Loading CheckBoxHandler");
 
         CheckBoxHandler.setData(groups, items, itemgroup_lookup);
