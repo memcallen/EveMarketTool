@@ -27,15 +27,13 @@ import java.util.stream.Stream;
 public class CacheFileUpdater {
 
     public static String read(String url) throws Exception {
-        String data = "";
-        Scanner scanner = new Scanner(new URL(url).openStream());
-
-        while (scanner.hasNextLine()) {
-            data += scanner.nextLine();
+        StringBuilder sb = new StringBuilder();
+        try (Scanner scanner = new Scanner(new URL(url).openStream())) {
+            while (scanner.hasNextLine()) {
+                sb.append(scanner.nextLine());
+            }
         }
-
-        scanner.close();
-        return data;
+        return sb.toString();
     }
 
     public static int[] getItemGroups() throws Exception {

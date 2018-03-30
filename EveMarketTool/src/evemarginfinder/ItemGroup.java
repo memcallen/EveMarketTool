@@ -1,6 +1,7 @@
 package evemarginfinder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -57,6 +58,6 @@ public class ItemGroup {
     }
 
     public String encode() {
-        return id + "\t" + parent + "\t" + name + "\t" + desc + "\t" + children.toString() + "\t" + items.toString();
+        return id + "\t" + parent + "\t" + name.trim() + "\t" + desc.trim() + "\t" + children.toString() + "\t" + items.toString();
     }
 }

@@ -139,21 +139,6 @@ public final class MainFrame extends javax.swing.JFrame {
         rem_inv = new javax.swing.JCheckBox();
         show_filters = new javax.swing.JButton();
         SettingsPanel = new javax.swing.JPanel();
-        jPanel2 = new javax.swing.JPanel();
-        jLabel6 = new javax.swing.JLabel();
-        cfg_format = new javax.swing.JTextField();
-        jLabel7 = new javax.swing.JLabel();
-        cfg_url = new javax.swing.JTextField();
-        jLabel9 = new javax.swing.JLabel();
-        cfg_idroot = new javax.swing.JTextField();
-        cfg_id = new javax.swing.JTextField();
-        jLabel10 = new javax.swing.JLabel();
-        cfg_reg = new javax.swing.JTextField();
-        jLabel11 = new javax.swing.JLabel();
-        cfg_stat = new javax.swing.JTextField();
-        cfg_save = new javax.swing.JButton();
-        cfg_vis_reset = new javax.swing.JButton();
-        cfg_vis_default = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         parse_decoder = new javax.swing.JComboBox<>();
         jLabel12 = new javax.swing.JLabel();
@@ -318,128 +303,6 @@ public final class MainFrame extends javax.swing.JFrame {
 
         TabbedPane.addTab("Info", InfoPanel);
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Query URL Formatting"));
-        jPanel2.setMinimumSize(new java.awt.Dimension(371, 211));
-
-        jLabel6.setText("URL Format:");
-
-        cfg_format.setText("{0}?{1}&{2}");
-        cfg_format.setToolTipText("{0}=url, {1}=typeid, {2}=system/region");
-
-        jLabel7.setText("URL:");
-
-        cfg_url.setText("https://market.fuzzwork.co.uk/aggregates/");
-
-        jLabel9.setText("TypeID Format:");
-
-        cfg_idroot.setText("types={0}");
-        cfg_idroot.setToolTipText("Root Format");
-
-        cfg_id.setText("{0},");
-        cfg_id.setToolTipText("Format for each number (concatted)");
-
-        jLabel10.setText("Region Format:");
-
-        cfg_reg.setText("region={0}");
-
-        jLabel11.setText("Station Format:");
-
-        cfg_stat.setText("station={0}");
-
-        cfg_save.setText("Save");
-        cfg_save.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cfg_saveActionPerformed(evt);
-            }
-        });
-
-        cfg_vis_reset.setText("Reset");
-        cfg_vis_reset.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cfg_vis_resetActionPerformed(evt);
-            }
-        });
-
-        cfg_vis_default.setText("Defaults");
-        cfg_vis_default.setEnabled(false);
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel10)
-                            .addComponent(jLabel11)
-                            .addComponent(jLabel9))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(cfg_idroot)
-                            .addComponent(cfg_reg)
-                            .addComponent(cfg_stat, javax.swing.GroupLayout.DEFAULT_SIZE, 112, Short.MAX_VALUE)
-                            .addComponent(cfg_id))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cfg_save, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(cfg_vis_reset, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(cfg_vis_default, javax.swing.GroupLayout.Alignment.TRAILING)))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jLabel6)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(cfg_format, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jLabel7)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(cfg_url, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 1, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel6)
-                    .addComponent(cfg_format, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel7)
-                    .addComponent(cfg_url, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(cfg_idroot, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(cfg_id, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGap(27, 27, 27)
-                                .addComponent(jLabel9)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel10)
-                            .addComponent(cfg_reg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel11)
-                            .addComponent(cfg_stat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 21, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cfg_vis_default)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cfg_vis_reset)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cfg_save)))
-                .addContainerGap())
-        );
-
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Response Parsing"));
 
         parse_decoder.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Fuzzworks" }));
@@ -478,9 +341,9 @@ public final class MainFrame extends javax.swing.JFrame {
                     .addComponent(jLabel13))
                 .addGap(9, 9, 9)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(parse_decoder, 0, 148, Short.MAX_VALUE)
-                    .addComponent(parse_table, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(98, Short.MAX_VALUE))
+                    .addComponent(parse_decoder, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(parse_table, 0, 148, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(parse_reload)
@@ -497,7 +360,7 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel13)
                     .addComponent(parse_table, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 18, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(parse_reload)
                 .addContainerGap())
         );
@@ -597,26 +460,19 @@ public final class MainFrame extends javax.swing.JFrame {
             SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(SettingsPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(24, 24, 24)
-                .addGroup(SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(SettingsPanelLayout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(236, Short.MAX_VALUE))
         );
         SettingsPanelLayout.setVerticalGroup(
             SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(SettingsPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(SettingsPanelLayout.createSequentialGroup()
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(111, Short.MAX_VALUE))
+                .addGroup(SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(275, Short.MAX_VALUE))
         );
 
         TabbedPane.addTab("Settings", SettingsPanel);
@@ -662,10 +518,14 @@ public final class MainFrame extends javax.swing.JFrame {
 
         model.clear();
 
-        for (JCheckBox box : CheckBoxHandler.Items_CheckBoxes) {
-            if (box.isSelected()) {
-                model.addElement(box.getText());
+        for (int i : CheckBoxHandler.getItems()) {
+            String s = DatabaseManager.queryItemName(i);
+            if(s == null){
+                ConsoleFrame.log_error("Warning: tried to get un-named item, database is corrupt");
+                JOptionPane.showMessageDialog(this, 
+                        "Warning: database might be corrupt, will probably give errors/incorrect numbers", "Database is Corrupted", JOptionPane.WARNING_MESSAGE);
             }
+            model.addElement(s);
         }
 
         selected_items.repaint();
@@ -767,9 +627,11 @@ public final class MainFrame extends javax.swing.JFrame {
                 output_table_data.removeIf(v -> Double.isNaN((double) v.get(1)) || Double.isInfinite((double) v.get(1)));
             }
 
-            output_table.revalidate();
-
+            table_model.fireTableDataChanged();
+            
             output_table.doLayout();
+
+            output_table.revalidate();
 
             output_table.repaint();
 
@@ -840,15 +702,6 @@ public final class MainFrame extends javax.swing.JFrame {
 
     }//GEN-LAST:event_system_idFocusLost
 
-    private void cfg_saveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_saveActionPerformed
-        Configuration.set("uformat", cfg_format.getText());
-        Configuration.set("url", cfg_url.getText());
-        Configuration.set("typeroot", cfg_idroot.getText());
-        Configuration.set("type", cfg_id.getText());
-        Configuration.set("region", cfg_reg.getText());
-        Configuration.set("station", cfg_stat.getText());
-    }//GEN-LAST:event_cfg_saveActionPerformed
-
     private void parse_decoderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parse_decoderActionPerformed
 
         if (parse_decoder.getItemCount() == 0) {
@@ -898,7 +751,6 @@ public final class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_parse_tableActionPerformed
 
     private void cfg_writeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_writeActionPerformed
-        this.cfg_saveActionPerformed(null);
         this.onexit(null);
     }//GEN-LAST:event_cfg_writeActionPerformed
 
@@ -954,10 +806,6 @@ public final class MainFrame extends javax.swing.JFrame {
 
     }//GEN-LAST:event_cfg_removeActionPerformed
 
-    private void cfg_vis_resetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_vis_resetActionPerformed
-        refreshConfigVisuals();
-    }//GEN-LAST:event_cfg_vis_resetActionPerformed
-
     private void show_filtersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_show_filtersActionPerformed
         filter.setVisible(!filter.isVisible());
     }//GEN-LAST:event_show_filtersActionPerformed
@@ -975,13 +823,6 @@ public final class MainFrame extends javax.swing.JFrame {
     }
 
     public void refreshConfigVisuals() {
-        cfg_format.setText(Configuration.get("uformat"));
-        cfg_url.setText(Configuration.get("url"));
-        cfg_idroot.setText(Configuration.get("typeroot"));
-        cfg_id.setText(Configuration.get("type"));
-        cfg_reg.setText(Configuration.get("region"));
-        cfg_stat.setText(Configuration.get("station"));
-
         int index = 0;
 
         parse_decoder.removeAllItems();
@@ -1024,36 +865,21 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel SettingsPanel;
     private javax.swing.JTabbedPane TabbedPane;
     private javax.swing.JButton cfg_add;
-    private javax.swing.JTextField cfg_format;
-    private javax.swing.JTextField cfg_id;
-    private javax.swing.JTextField cfg_idroot;
-    private javax.swing.JTextField cfg_reg;
     private javax.swing.JButton cfg_reload;
     private javax.swing.JButton cfg_remove;
-    private javax.swing.JButton cfg_save;
-    private javax.swing.JTextField cfg_stat;
-    private javax.swing.JTextField cfg_url;
-    private javax.swing.JButton cfg_vis_default;
-    private javax.swing.JButton cfg_vis_reset;
     private javax.swing.JButton cfg_write;
     private javax.swing.JComboBox<String> config_selector;
     private javax.swing.JButton deselect;
     private javax.swing.JButton jButton1;
     private javax.swing.JCheckBox jCheckBox2;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
