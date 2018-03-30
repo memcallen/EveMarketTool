@@ -519,7 +519,13 @@ public final class MainFrame extends javax.swing.JFrame {
         model.clear();
 
         for (int i : CheckBoxHandler.getItems()) {
-            model.addElement(DatabaseManager.queryItemName(i));
+            String s = DatabaseManager.queryItemName(i);
+            if(s == null){
+                ConsoleFrame.log_error("Warning: tried to get un-named item, database is corrupt");
+                JOptionPane.showMessageDialog(this, 
+                        "Warning: database might be corrupt, will probably give errors/incorrect numbers", "Database is Corrupted", JOptionPane.WARNING_MESSAGE);
+            }
+            model.addElement(s);
         }
 
         selected_items.repaint();
@@ -621,9 +627,11 @@ public final class MainFrame extends javax.swing.JFrame {
                 output_table_data.removeIf(v -> Double.isNaN((double) v.get(1)) || Double.isInfinite((double) v.get(1)));
             }
 
-            output_table.revalidate();
-
+            table_model.fireTableDataChanged();
+            
             output_table.doLayout();
+
+            output_table.revalidate();
 
             output_table.repaint();
 
