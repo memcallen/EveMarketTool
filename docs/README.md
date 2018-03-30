@@ -15,7 +15,7 @@ EveMarketTool will run on almost all machines. Recommended minimum ram is 4 Giga
 
 The first tab indicates the items you would like to query
  - Select item groups with the left panel
- - Select idividual items with the right panel
+ - Select individual items with the right panel
  - Both panels support searching, via the text input above both panels (Press enter to loop through all that match)
 
 ![Second Tab Image](https://raw.githubusercontent.com/memcallen/EveMarketTool/master/docs/images/secondtabscreenshot.png)
@@ -42,6 +42,7 @@ The third tab is for configuring the api website and formatting for the url
 
  - Generic Table implements a generic table with coloring
  - In order for coloring to work, you must specify one of the following filters:
+ - Note: Minimum_Margin no longer needs to be specified, and the default can be found in the .emt.cfg file for the current decoder (can be freely edited, so long as it is a decimal percent)
    - Maximum_Price
      - In ISK
    - Minimum_Margin
@@ -55,20 +56,7 @@ The third tab is for configuring the api website and formatting for the url
 
 # API URL Configuration
 
-This section is only relevant if fuzzworks has stopped its service, or if you want to configure EveMarketTool to use another api. It is based off of the Python method for string formatting
-
-URL Format
- - {0} is the root url (Specified by the URL field)
- - {1} is the typeid section (Generated via the TypeID section)
- - {2} is the region or station format (Specified via the Region & Station fields)
-
-TypeID Format
- - The first field is the root for the TypeID string
- - The second string specifies the format for each typeid - This is repeated for each typeid
-
-Region & Station Format
- - These fields are used with the Station/Region field in the Info tab
-   - Currently, this functionality is hardcoded to use the station field
+EveMarketTool's URL formatting is now done in the query decoder files to allow the url to be constructed by logic, rather than string formatting.
 
 # LUA API
 
@@ -106,6 +94,14 @@ void filter:set(String, String)
 
 ### Required Lua Methods
 
+String getURL(int sysid, boolean system)
+ - Creates a url for the current decoder
+ - sysid is the current system or region id
+ - system
+   - True:  user wants to check system market
+   - False: user wants to check region/station market
+ - Returns a string, which is directly queried
+
 Table translate(Userdata json)
  - The json parameter is the root element from the actual response, see [Gson @ JsonElement](https://github.com/google/gson/blob/master/gson/src/main/java/com/google/gson/JsonElement.java) for its methods
   - Returns a zero-indexed array with buy at 0 and sell at 1
@@ -123,6 +119,8 @@ Table translateTable(buy object, sell object)
  - Translates a set of buy and sell objects into a row for the table
  - buy and sell are the same format that was returned from translate
  - Returns a table which contains the data for each of the table headers
+
+### Optional Lua Methods
 
 Table translateTableCol(buy object, sell object, HashMap<String, String> properties)
  - Translates a set of buy and sell objects into a row for the table
