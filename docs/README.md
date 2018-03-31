@@ -10,17 +10,17 @@ EveMarketTool will run on almost all machines. Recommended minimum ram is 4 Giga
 
 # Usage
 
-
-![First Tab Image](https://raw.githubusercontent.com/memcallen/EveMarketTool/master/docs/images/firsttabscreenshot.png)
-
-The first tab indicates the items you would like to query
+### Tab One
+ - Indicates the items you would like to query
  - Select item groups with the left panel
  - Select individual items with the right panel
  - Both panels support searching, via the text input above both panels (Press enter to loop through all that match)
 
-![Second Tab Image](https://raw.githubusercontent.com/memcallen/EveMarketTool/master/docs/images/secondtabscreenshot.png)
+![First Tab Image](https://raw.githubusercontent.com/memcallen/EveMarketTool/master/docs/images/firsttabscreenshot.png)
 
-The second tab is where the queries are displayed
+
+### Tab Two
+ - Where the queries are displayed
  - The left panel is where the items to be queried are displayed
    - Currently, the panel is display only and you cannot modify the items through it
  - The filters button opens a window which allows you to set filters
@@ -33,7 +33,11 @@ The second tab is where the queries are displayed
    - For queries less than 50 items, it will take approximately 5 seconds, but increases rapidly after 100 items
  - The table can be sorted by clicking on the column headers
 
-The third tab is for configuring the API
+![Second Tab Image](https://raw.githubusercontent.com/memcallen/EveMarketTool/master/docs/images/secondtabscreenshot.png)
+
+
+### Tab Three
+ - For configuring the API
  - Currently, you can only edit the config files manually, but this is on the to-do list
  - Config File Section:
    - Add Cfg
@@ -58,17 +62,16 @@ The third tab is for configuring the API
 ## Generic Table Filters
 
  - Generic Table implements a generic table with coloring
- - In order for coloring to work, you must specify one of the following filters:
+ - Currently implemented filters:
    - Maximum_Price
      - In ISK
    - Minimum_Margin
      - In decimal percent (0.5, 0.15, etc)
- - Other filters:
    - Invalid_Color
      - By default, Generic Table uses red highlight as the invalid color
      - Allows you to change the highlight color
        - Can be any lowercase plaintext color (red, blue, green, etc)
-         - Uses reflection to get colors from Java's Color class (if it's a constant, you can use it)
+         - Uses Java reflection to get colors from Java's Color class (if it's a constant, you can use it)
 
 # LUA API
 
