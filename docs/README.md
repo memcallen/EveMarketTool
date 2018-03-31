@@ -10,16 +10,20 @@ EveMarketTool will run on almost all machines. Recommended minimum ram is 4 Giga
 
 # Usage
 
-### Tab One
+## Tab One
+
+![First Tab Image](https://raw.githubusercontent.com/memcallen/EveMarketTool/master/docs/images/firsttabscreenshot.png)
+
  - Indicates the items you would like to query
  - Select item groups with the left panel
  - Select individual items with the right panel
  - Both panels support searching, via the text input above both panels (Press enter to loop through all that match)
 
-![First Tab Image](https://raw.githubusercontent.com/memcallen/EveMarketTool/master/docs/images/firsttabscreenshot.png)
 
+## Tab Two
 
-### Tab Two
+![Second Tab Image](https://raw.githubusercontent.com/memcallen/EveMarketTool/master/docs/images/secondtabscreenshot.png)
+
  - Where the queries are displayed
  - The left panel is where the items to be queried are displayed
    - Currently, the panel is display only and you cannot modify the items through it
@@ -32,8 +36,6 @@ EveMarketTool will run on almost all machines. Recommended minimum ram is 4 Giga
    - This takes a few seconds, don't press the button multiple times
    - For queries less than 50 items, it will take approximately 5 seconds, but increases rapidly after 100 items
  - The table can be sorted by clicking on the column headers
-
-![Second Tab Image](https://raw.githubusercontent.com/memcallen/EveMarketTool/master/docs/images/secondtabscreenshot.png)
 
 
 ### Tab Three
