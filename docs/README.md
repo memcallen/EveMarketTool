@@ -93,50 +93,50 @@ EveMarketTool uses LuaJ to parse and run the lua scripts. Currently, the default
  - JseJava
  - LuaJava
 
-### Java Methods
+## Java Methods
 
-Table<Integer> getTypes()
+### Table<Integer> getTypes()
  - Returns the current query's typeids as a table
 
-String getItemName(Integer typeid)
+### String getItemName(Integer typeid)
  - Returns the Item Name from its typeid
 
-String filter:get(String)
+### String filter:get(String)
  - Gets a property from the filter window
  - Returns nil if none found
 
-void filter:set(String, String)
+### void filter:set(String, String)
  - Sets a property for the filter window
  - Properties are global unless EveMarketTool restarted
 
-### Required Lua Methods
+## Required Lua Methods
 
-String getURL(int systemid, boolean system)
+### String getURL(int systemid, boolean system)
  - The systemid parameter is the provided system or region id, from the second tab
  - The system parameter is true if it's a system/region, false if it's a station
  - Returns a string, which is directly queried
 
-Table translate(Userdata json)
+### Table translate(Userdata json)
  - The json parameter is the root element from the actual response, see [Gson @ JsonElement](https://github.com/google/gson/blob/master/gson/src/main/java/com/google/gson/JsonElement.java) for its methods
   - Returns a zero-indexed array with buy at 0 and sell at 1
     - Each item entry is a table of the format \[ID(int),Volume(int), Minimum Price(Double), Maximum Price(Double), TopFiveAvg(Double)\]
     - TopFiveAvg is the average of the 'best' five percent of orders (ie lowest for buy, highest for sell)
     - If your web api doesn't have a top five percent field, use the appropriate value or write a table generator
 
-Table<String> getColumnTypes()
+### Table<String> getColumnTypes()
   - Specifies the java classes for each of the columns, java.lang.Object should work for odd object types (Do not leave any empty)
 
-Table<String> getColumnNames()
+### Table<String> getColumnNames()
   - Specifies the column header names
 
-Table translateTable(buy object, sell object)
+### Table translateTable(buy object, sell object)
  - Translates a set of buy and sell objects into a row for the table
  - buy and sell are the same format that was returned from translate
  - Returns a table which contains the data for each of the table headers
 
-### Optional Lua Methods
+## Optional Lua Methods
 
-Table translateTableCol(buy object, sell object, HashMap<String, String> properties)
+### Table translateTableCol(buy object, sell object, HashMap<String, String> properties)
  - Translates a set of buy and sell objects into a row for the table
  - Only enabled if the config's do-table-color == true
  - buy and sell are the same as translateTable
