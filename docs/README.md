@@ -77,7 +77,7 @@ EveMarketTool will run on almost all machines. Recommended minimum ram is 4 Giga
 
 # LUA API
 
-This section specifies the defined methods and default APIs available to the Lua script files
+This section specifies the defined methods and default APIs available to the Lua script files.
 EveMarketTool uses LuaJ to parse and run the lua scripts. Currently, the default APIs are based on LuaJ's JsePlatform.standardGlobals, but this will most likely change due to security reasons.
 
 #### Default APIs:
