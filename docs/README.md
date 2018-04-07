@@ -16,6 +16,7 @@ EveMarketTool will run on almost all machines. Recommended minimum ram is 4 Giga
 
  - Indicates the items you would like to query
  - Select item groups with the left panel
+   - If you hover over the item group, it will show you the 'super' type of it, which represents the top group (ie. Ships, Ship Modificatons, Trade Goods, etc)
  - Select individual items with the right panel
  - Both panels support searching, via the text input above both panels (Press enter to loop through all that match)
 
