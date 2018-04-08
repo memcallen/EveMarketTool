@@ -13,16 +13,37 @@ import java.awt.Rectangle;
 import java.util.function.Supplier;
 
 /**
- * TODO add author
+ * This LayoutManager is an optimized vertical {@link BoxLayout}, specialized
+ * for a {@link JScrollPane}. Given a Rectangle supplier, which returns the
+ * visible rectangle of the JScrollPane, this class will make only the
+ * components inside the view visible.<p>
  *
- * @author
+ * The function given to the constructor should be related to
+ * {@code JScrollPane.getViewport()::getViewRect}<p>
+ *
+ * Often times, the following code segment will need to be added in order to
+ * properly update this LayoutManager.
+ * <pre>
+ * <code>
+ * JScrollPane.getViewport().addChangeListener((ChangeEvent e) -> {
+ *      JScrollPane.getViewport().revalidate();
+ *  });
+ * </code>
+ * </pre>
+ *
+ * @author Memcallen Kahoudi/Recursive Pineapple
  */
 public class OptimizedScrollPaneLayout implements LayoutManager {
 
-    private Supplier<Rectangle> get_bounds;
+    private final Supplier<Rectangle> get_bounds;
+
+    public OptimizedScrollPaneLayout() {
+        get_bounds = null;
+    }
 
     public OptimizedScrollPaneLayout(Supplier<Rectangle> get_bounds) {
-        this.get_bounds = get_bounds;
+        //if get_bounds is null, create a new lambda that returns null
+        this.get_bounds = get_bounds == null ? () -> null : get_bounds;
     }
 
     @Override
