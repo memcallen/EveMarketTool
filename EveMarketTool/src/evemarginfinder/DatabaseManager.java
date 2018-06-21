@@ -17,12 +17,10 @@ import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Vector;
-import java.util.stream.IntStream;
 
 /**
  *
@@ -213,6 +211,8 @@ public class DatabaseManager extends Thread {
                 }
 
                 ig.superparent = sp;
+            }else{
+                ig.issuper = true;
             }
         }
 
@@ -301,6 +301,15 @@ public class DatabaseManager extends Thread {
             ConsoleFrame.log(ex.getMessage());
             return;
         }
+        
+        Thread.setDefaultUncaughtExceptionHandler((Thread t, Throwable e) -> {
+            
+            String message = "Error, uncaught exception in thread " + t.getName() + ":\n" + 
+                    (e.getMessage() == null ? "Unknown Exception" : e.getMessage());
+            ConsoleFrame.log_error(message); // ConsoleFrame may not have been initialized
+            System.out.println(message);
+            e.printStackTrace();
+        });
 
         ConsoleFrame frame = new ConsoleFrame();
 

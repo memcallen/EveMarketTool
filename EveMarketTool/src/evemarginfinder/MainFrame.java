@@ -71,11 +71,9 @@ public final class MainFrame extends javax.swing.JFrame {
         ConsoleFrame.log("Initing components");
         initComponents();
 
-        ItemGroupPanel.setLayout(new OptimizedScrollPaneLayout(GroupScroll.getViewport()::getViewRect));
-        GroupScroll.getViewport().addChangeListener((ChangeEvent e) -> {
-            GroupScroll.getViewport().revalidate();
-        });
-
+        GroupScroll.getVerticalScrollBar().setUnitIncrement(20);
+        ItemScroll.getVerticalScrollBar().setUnitIncrement(20);
+        
         ItemPanel.setLayout(new OptimizedScrollPaneLayout(ItemScroll.getViewport()::getViewRect));
         ItemScroll.getViewport().addChangeListener((ChangeEvent e) -> {
             ItemScroll.getViewport().revalidate();
@@ -97,6 +95,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         ConsoleFrame.log("Initing Check Boxes");
         CheckBoxHandler.initializeCheckBoxes(ItemGroupPanel, ItemPanel);
+        CheckBoxHandler.setNumCounter(NumSelected);
 
         ConsoleFrame.log("Loading ConfigBox Model");
 
@@ -125,6 +124,8 @@ public final class MainFrame extends javax.swing.JFrame {
         ItemGroupSearch = new javax.swing.JTextField();
         ItemSearch = new javax.swing.JTextField();
         deselect = new javax.swing.JButton();
+        jLabel4 = new javax.swing.JLabel();
+        NumSelected = new javax.swing.JTextField();
         InfoPanel = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         load_items = new javax.swing.JButton();
@@ -178,7 +179,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         SelectionPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        ItemGroupPanel.setLayout(new java.awt.GridLayout(100, 1));
+        ItemGroupPanel.setLayout(null);
         GroupScroll.setViewportView(ItemGroupPanel);
 
         SelectionPanel.add(GroupScroll, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 40, 340, 350));
@@ -224,6 +225,13 @@ public final class MainFrame extends javax.swing.JFrame {
             }
         });
         SelectionPanel.add(deselect, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 10, -1, -1));
+
+        jLabel4.setText("# Selected:");
+        SelectionPanel.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 10, -1, 30));
+
+        NumSelected.setEditable(false);
+        NumSelected.setText("0");
+        SelectionPanel.add(NumSelected, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 10, 60, -1));
 
         TabbedPane.addTab("Select Groups", SelectionPanel);
 
@@ -463,7 +471,7 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(236, Short.MAX_VALUE))
+                .addContainerGap(217, Short.MAX_VALUE))
         );
         SettingsPanelLayout.setVerticalGroup(
             SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -861,6 +869,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel ItemPanel;
     private javax.swing.JScrollPane ItemScroll;
     private javax.swing.JTextField ItemSearch;
+    private javax.swing.JTextField NumSelected;
     private javax.swing.JPanel SelectionPanel;
     private javax.swing.JPanel SettingsPanel;
     private javax.swing.JTabbedPane TabbedPane;
@@ -878,6 +887,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;

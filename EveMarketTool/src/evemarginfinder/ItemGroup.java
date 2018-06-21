@@ -1,7 +1,6 @@
 package evemarginfinder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -16,6 +15,7 @@ public class ItemGroup {
     public int parent = -1;
     public int id = -1;
     public int superparent = -1;
+    public boolean issuper = false;
     public List<Integer> children = new ArrayList<>();
     public String name = "";
     public String desc = "";

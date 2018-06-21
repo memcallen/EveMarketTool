@@ -1,10 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package evemarginfinder;
 
+import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
@@ -17,7 +13,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.IntStream;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+import treepanel.HideableTreeNode;
+import treepanel.TreeNode;
+import treepanel.TreePanelLayout;
 
 /**
  *
@@ -62,14 +63,19 @@ public class CheckBoxHandler extends Thread {
     }
 
     //<editor-fold defaultstate="collapsed" desc="Variable Definitions">
+    //'final' definitions
     public static ItemGroup[] item_groups;
     public static HashMap<Integer, ItemGroup> itemgroup_lookup_id = new HashMap<>();
     public static Map.Entry<Integer, String>[] items = null;
 
+    //layout stuff
+    public static TreePanelLayout ItemGroups_Layout = new TreePanelLayout();
+    public static HideableTreeNode ItemGroups_Root;
+    public static HashMap<ItemGroup, HideableTreeNode> TreeNode_Lookup = new HashMap<>();
     public static JCheckBox[] ItemGroups_CheckBoxes = null;
     public static JCheckBox[] Items_CheckBoxes = null;
-    public static java.awt.GridLayout ItemGroups_Layout = new java.awt.GridLayout(0, 1);
     public static java.awt.GridLayout Items_Layout = new java.awt.GridLayout(0, 1);
+    public static JTextField SelectedCount;
 
     //the select queues
     public static ConcurrentLinkedQueue<Integer> item_queue = new ConcurrentLinkedQueue<>();
@@ -83,6 +89,7 @@ public class CheckBoxHandler extends Thread {
     public final static List<Integer> item_selection = Collections.synchronizedList(new ArrayList<>());
     public final static List<Integer> group_selection = Collections.synchronizedList(new ArrayList<>());
 
+    //selection info
     private static volatile boolean initialized = false;
     private static boolean items_changed = false;
     private static int[] id_cache;
@@ -200,7 +207,7 @@ public class CheckBoxHandler extends Thread {
     @SuppressWarnings("empty-statement")
     public void run() {
 
-        while (!main_initialized){
+        while (!main_initialized) {
             Thread.yield();
         }
 
@@ -219,24 +226,6 @@ public class CheckBoxHandler extends Thread {
             }
 
         }
-    }
-
-    public static void initialize() {
-
-        if (main != null) {
-            if (main.isAlive()) {
-                main.interrupt();
-            }
-        }
-
-        main = new CheckBoxHandler();
-
-        main.setName("CheckBox-Checker");
-
-        main.setDaemon(true);
-
-        main.start();
-
     }
 
     private static boolean contains(int[] array, int number) {
@@ -268,6 +257,8 @@ public class CheckBoxHandler extends Thread {
         group_cache = group_stream.build().distinct().toArray();
         Arrays.sort(group_cache);
 
+        SelectedCount.setText(Integer.toString(id_cache.length + group_cache.length));
+        
     }
 
     private static void updateCheckBoxes() {
@@ -285,6 +276,26 @@ public class CheckBoxHandler extends Thread {
 
     }
 
+    //<editor-fold desc="Initialization Stuff" defaultstate="collapsed">
+    
+    public static void initialize() {
+
+        if (main != null) {
+            if (main.isAlive()) {
+                main.interrupt();
+            }
+        }
+
+        main = new CheckBoxHandler();
+
+        main.setName("CheckBox-Checker");
+
+        main.setDaemon(true);
+
+        main.start();
+
+    }
+
     public static void initializeCheckBoxes(JPanel item_group_panel, JPanel item_panel) {
 
         ConsoleFrame.log("Checkboxes - Initing stuff");
@@ -292,12 +303,10 @@ public class CheckBoxHandler extends Thread {
         item_group_panel.setLayout(ItemGroups_Layout);
         item_panel.setLayout(Items_Layout);
 
-        ConsoleFrame.log("Checkboxes - Doing Groups");
+        ConsoleFrame.log("Checkboxes - Initializing Groups");
 
         //Groups
         ItemGroups_CheckBoxes = new JCheckBox[item_groups.length];
-
-        ItemGroups_Layout.setRows(item_groups.length + 1);
 
         int perc = item_groups.length / 20;
 
@@ -312,15 +321,14 @@ public class CheckBoxHandler extends Thread {
             if (curr.superparent == -1) {
                 box.setToolTipText(String.format("Id: %d, Is Super", curr.id));
             } else {
-                box.setToolTipText(
-                        String.format("Id: %d, Super: %s", curr.id,
-                                itemgroup_lookup_id.get(curr.superparent).name
-                        ));
+                String name = itemgroup_lookup_id.get(curr.superparent).name;
+                box.setToolTipText(String.format("Id: %d, Super: %s", curr.id, name));
             }
 
-            box.addItemListener(new CheckBoxListener(curr.id, group_queue, group_queue_des));
+            // only superparents are visible initially
+            TreeNode_Lookup.put(curr, new HideableTreeNode(box, false));
 
-            item_group_panel.add(box);
+            box.addItemListener(new CheckBoxListener(curr.id, group_queue, group_queue_des));
 
             if (i % perc == 0) {
                 ConsoleFrame.log("Checkboxes - Group:" + Math.round(i / perc * 100) / 100 * 5 + "%");
@@ -330,14 +338,18 @@ public class CheckBoxHandler extends Thread {
 
         ConsoleFrame.log("Checkboxes - Group:100%");
 
-        ConsoleFrame.log("Created Checkboxes:Groups in " + (System.currentTimeMillis() - pre) + " millis");
+        ConsoleFrame.log("Initialized Checkboxes-Groups in " + (System.currentTimeMillis() - pre) + " millis");
 
-        ConsoleFrame.log("Checkboxes - Doing Items");
+        buildCheckBoxTree(item_group_panel);
+
+        ItemGroups_Layout.setRoot(ItemGroups_Root);
+
+        ConsoleFrame.log("Checkboxes - Creating Items");
 
         //Items
         Items_CheckBoxes = new JCheckBox[items.length];
 
-        Items_Layout.setRows(items.length + 1);
+        Items_Layout.setRows(items.length);
 
         perc = items.length / 20;
 
@@ -361,10 +373,54 @@ public class CheckBoxHandler extends Thread {
 
         ConsoleFrame.log("Checkboxes - Item:100%");
 
-        ConsoleFrame.log("Created Checkboxes:Items in " + (System.currentTimeMillis() - pre) + " millis");
+        ConsoleFrame.log("Created Checkboxes-Items in " + (System.currentTimeMillis() - pre) + " millis");
 
         main_initialized = true;
 
+    }
+
+    public static void buildCheckBoxTree(JPanel tree_panel) {
+
+        ConsoleFrame.log("Checkboxes - Configuring Groups");
+
+        ItemGroups_Root = new HideableTreeNode(new JLabel("Root"));
+
+        long pre = System.currentTimeMillis();
+
+        tree_panel.add(ItemGroups_Root.GetValue());
+
+        TreeNode_Lookup.entrySet().stream().forEach((e) -> {
+            ItemGroup curr = e.getKey();
+            HideableTreeNode node = e.getValue();
+
+            // The parent for the current node
+            HideableTreeNode parent = curr.issuper ? ItemGroups_Root
+                    : TreeNode_Lookup.get(itemgroup_lookup_id.get(curr.parent));
+
+            // sorts alphabetically, but doesn't group branches together
+            parent.AddChildSorted(node, CheckBoxHandler::CompareCheckbox);
+
+            tree_panel.add(node.GetValue());
+        });
+
+        TreeNode_Lookup.values().stream().filter(TreeNode::isBranch)
+                .forEach((n) -> TreeNode.GroupChildren(n, CheckBoxHandler::MapCheckbox));
+
+        // updates all nodes and their icons
+        ItemGroups_Root.setState(true);
+
+        ConsoleFrame.log("Checkboxes - Finished Configuring Groups (" + (System.currentTimeMillis() - pre) + " ms)");
+
+    }
+
+    public static int CompareCheckbox(TreeNode<Component> a, TreeNode<Component> b) {
+        JCheckBox ca = (JCheckBox) ((HideableTreeNode) a).GetComp();
+        JCheckBox cb = (JCheckBox) ((HideableTreeNode) b).GetComp();
+        return ca.getText().toLowerCase().compareTo(cb.getText().toLowerCase());
+    }
+
+    public static int MapCheckbox(TreeNode<Component> a) {
+        return a.isLeaf() ? 1 : 0;
     }
 
     public static void setData(ItemGroup[] item_groups, Map.Entry<Integer, String>[] items,
@@ -374,4 +430,10 @@ public class CheckBoxHandler extends Thread {
         CheckBoxHandler.itemgroup_lookup_id = group_lookup;
     }
 
+    public static void setNumCounter(JTextField counter) {
+        SelectedCount = counter;
+    }
+    
+    //</editor-fold>
+    
 }
