@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import treepanel.HideableTreeNode;
 import treepanel.TreeNode;
+import treepanel.TreeNode.NodeIteratorInfo;
 import treepanel.TreePanelLayout;
 
 /**
@@ -71,6 +72,7 @@ public class CheckBoxHandler extends Thread {
     //layout stuff
     public static TreePanelLayout ItemGroups_Layout = new TreePanelLayout();
     public static HideableTreeNode ItemGroups_Root;
+    public static HashMap<HideableTreeNode, ItemGroup> TreeNode_Lookup2 = new HashMap<>();
     public static HashMap<ItemGroup, HideableTreeNode> TreeNode_Lookup = new HashMap<>();
     public static JCheckBox[] ItemGroups_CheckBoxes = null;
     public static JCheckBox[] Items_CheckBoxes = null;
@@ -258,7 +260,7 @@ public class CheckBoxHandler extends Thread {
         Arrays.sort(group_cache);
 
         SelectedCount.setText(Integer.toString(id_cache.length + group_cache.length));
-        
+
     }
 
     private static void updateCheckBoxes() {
@@ -276,8 +278,75 @@ public class CheckBoxHandler extends Thread {
 
     }
 
+    /**
+     * Finds the next item group tree-wise after <after>
+     * @param substring The text to find in the itemgroup name
+     * @param after The itemgroup to continue after, or null to start at the beginning
+     * @return The next itemgroup, or null at the end of the list
+     * @throws IllegalArgumentException Not an actual exception, just a means of giving the caller an error message
+     *  which is not likely to be thrown within the body of the function
+     */
+    public static ItemGroup findGroup(String substring, ItemGroup after) throws IllegalArgumentException {
+
+        //if after isnt null, it will look for the group
+        boolean found = after == null;
+        boolean anyfound = false;
+
+        for (NodeIteratorInfo<Component> info : ItemGroups_Root) {
+            
+            ItemGroup ig = TreeNode_Lookup2.get(info.node);
+
+            if(ig == null) {
+                continue;
+            }
+            
+            // this is a weird if layout, but it works
+            if (ig.name.toLowerCase().contains(substring)) {
+                anyfound = true;
+
+                if (ig == after) {
+                    found = true;
+                    continue;
+                }
+
+                if (found) {
+                    return ig;
+                }
+            }
+
+        }
+
+        throw new IllegalArgumentException(anyfound ? "Reached End Of Groups" : "No Matches Found");
+    }
+
+    /**
+     * Sets a node's parents visible, and returns the node's component information
+     * @param group The itemgroup to look for
+     * @return The node, or null if no group found
+     */
+    public static HideableTreeNode showBoxesTo(ItemGroup group) {
+
+        HideableTreeNode group_node = TreeNode_Lookup.get(group);
+        
+        if(group_node == null) {
+            return null;
+        }
+        
+        HideableTreeNode retnode = group_node;
+        
+        while (group_node != null) {
+            group_node.setState(true);
+            if (group_node.parent instanceof HideableTreeNode) {
+                group_node = (HideableTreeNode) group_node.parent;
+            } else {
+                break;
+            }
+        }
+
+        return retnode;
+    }
+
     //<editor-fold desc="Initialization Stuff" defaultstate="collapsed">
-    
     public static void initialize() {
 
         if (main != null) {
@@ -325,8 +394,9 @@ public class CheckBoxHandler extends Thread {
                 box.setToolTipText(String.format("Id: %d, Super: %s", curr.id, name));
             }
 
-            // only superparents are visible initially
-            TreeNode_Lookup.put(curr, new HideableTreeNode(box, false));
+            HideableTreeNode node = new HideableTreeNode(box, false);
+            TreeNode_Lookup.put(curr, node);
+            TreeNode_Lookup2.put(node, curr);
 
             box.addItemListener(new CheckBoxListener(curr.id, group_queue, group_queue_des));
 
@@ -433,7 +503,6 @@ public class CheckBoxHandler extends Thread {
     public static void setNumCounter(JTextField counter) {
         SelectedCount = counter;
     }
-    
+
     //</editor-fold>
-    
 }

@@ -274,8 +274,8 @@ public class TreeNode<T> implements Iterable<NodeIteratorInfo<T>> {
 
     public static class NodeIteratorInfo<T> {
 
-        TreeNode<T> node;
-        int node_depth;
+        public TreeNode<T> node;
+        public int node_depth;
 
         public NodeIteratorInfo(TreeNode<T> node, int depth) {
             this.node = node;

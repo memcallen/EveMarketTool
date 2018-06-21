@@ -1,9 +1,13 @@
 package evemarginfinder;
 
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.LayoutManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Vector;
 import javax.swing.DefaultListModel;
@@ -17,6 +21,8 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.luaj.vm2.LuaError;
+import treepanel.HideableTreeNode;
+import treepanel.TreePanelLayout;
 
 /**
  *
@@ -33,7 +39,13 @@ public final class MainFrame extends javax.swing.JFrame {
     public final Vector<Vector> output_table_data = new Vector();
     public TableCellRenderer cell = new TableCellRenderer(output_table_data);
 
-    public int group_search_index = 0;
+    private String group_search_text = null;
+    private List<ItemGroup> cached_group_results = null;
+    private Font old_group_font = null;
+    private Component current_font_comp = null;
+    private Component current_group_comp = null;
+
+    public ItemGroup group_last_ig = null;
     public int item_search_index = 0;
 
     private static int sysid = 30000142;
@@ -73,7 +85,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         GroupScroll.getVerticalScrollBar().setUnitIncrement(20);
         ItemScroll.getVerticalScrollBar().setUnitIncrement(20);
-        
+
         ItemPanel.setLayout(new OptimizedScrollPaneLayout(ItemScroll.getViewport()::getViewRect));
         ItemScroll.getViewport().addChangeListener((ChangeEvent e) -> {
             ItemScroll.getViewport().revalidate();
@@ -96,6 +108,13 @@ public final class MainFrame extends javax.swing.JFrame {
         ConsoleFrame.log("Initing Check Boxes");
         CheckBoxHandler.initializeCheckBoxes(ItemGroupPanel, ItemPanel);
         CheckBoxHandler.setNumCounter(NumSelected);
+
+        LayoutManager layout = ItemGroupPanel.getLayout();
+        if (layout instanceof TreePanelLayout) {
+            ((TreePanelLayout) layout).addLayoutEventListener(this::updateGroupScrollPosition);
+        } else {
+            ConsoleFrame.log_error("Warning: ItemGroup Panel doesn't have a TreePanelLayout");
+        }
 
         ConsoleFrame.log("Loading ConfigBox Model");
 
@@ -496,23 +515,54 @@ public final class MainFrame extends javax.swing.JFrame {
 
     }//GEN-LAST:event_deselectActionPerformed
 
+    private void updateGroupScrollPosition() {
+
+        if (current_group_comp != null) {
+            int amount = current_group_comp.getY();
+
+            GroupScroll.getVerticalScrollBar().setValue(amount);
+            current_group_comp = null;
+        }
+    }
+
     private void ItemGroupSearchKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ItemGroupSearchKeyTyped
 
         if (evt.getKeyChar() == '\n') {
-            int found = 0;
-            for (JCheckBox box : CheckBoxHandler.ItemGroups_CheckBoxes) {
-                if (box.getText().toLowerCase().contains(ItemGroupSearch.getText().toLowerCase())) {
-                    found++;
-                    if (found > group_search_index) {
-                        group_search_index++;
-                        GroupScroll.getVerticalScrollBar().setValue(box.getY());
-                        return;
-                    }
-                }
+
+            String field_text = ItemGroupSearch.getText().toLowerCase();
+
+            // if result already cached, use it, otherwise recalculate it
+            if (!field_text.equals(group_search_text)) {
+                group_last_ig = null;
+                group_search_text = field_text;
+                cached_group_results = null;
             }
 
+            try {
+                group_last_ig = CheckBoxHandler.findGroup(field_text, group_last_ig);
+            } catch (IllegalArgumentException e) {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                group_last_ig = null;
+                return; // don't search on error
+            }
+
+            HideableTreeNode node = CheckBoxHandler.showBoxesTo(group_last_ig);
+
+            if (current_font_comp != null) {
+                current_font_comp.setFont(old_group_font);
+            }
+
+            current_group_comp = node.GetValue();
+            current_font_comp = node.GetComp();
+            old_group_font = current_font_comp.getFont();
+
+            Font font = new Font(old_group_font.getName(), Font.BOLD, old_group_font.getSize());
+
+            current_font_comp.setFont(font);
+
+            current_group_comp.revalidate();
+
         }
-        group_search_index = 0;
 
     }//GEN-LAST:event_ItemGroupSearchKeyTyped
 
@@ -528,9 +578,9 @@ public final class MainFrame extends javax.swing.JFrame {
 
         for (int i : CheckBoxHandler.getItems()) {
             String s = DatabaseManager.queryItemName(i);
-            if(s == null){
+            if (s == null) {
                 ConsoleFrame.log_error("Warning: tried to get un-named item, database is corrupt");
-                JOptionPane.showMessageDialog(this, 
+                JOptionPane.showMessageDialog(this,
                         "Warning: database might be corrupt, will probably give errors/incorrect numbers", "Database is Corrupted", JOptionPane.WARNING_MESSAGE);
             }
             model.addElement(s);
@@ -636,7 +686,7 @@ public final class MainFrame extends javax.swing.JFrame {
             }
 
             table_model.fireTableDataChanged();
-            
+
             output_table.doLayout();
 
             output_table.revalidate();

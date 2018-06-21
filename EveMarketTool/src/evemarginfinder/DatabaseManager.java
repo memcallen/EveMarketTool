@@ -17,6 +17,7 @@ import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
@@ -92,6 +93,18 @@ public class DatabaseManager extends Thread {
         return ret;
     }
 
+    public static List<ItemGroup> matchNames(String text) {
+        LinkedList<ItemGroup> ll = new LinkedList<>();
+        
+        for(ItemGroup ig : itemgroup_lookup.values()) {
+            if(ig.name.toLowerCase().contains(text)) {
+                ll.push(ig);
+            }
+        }
+        
+        return ll;
+    }
+    
     public static int queryItemId(String name) {
 
         for (Entry<Integer, String> item : items) {
