@@ -6,7 +6,7 @@ EveMarketTool is an application to bulk-price check items, which can be specifie
 EveMarketTool does not need to be installed. The only setup required is downloading the zip file from [releases](https://github.com/memcallen/EveMarketTool/releases) and unzipping the file.
 
 # Hardware requirements
-EveMarketTool will run on almost all machines. Recommended minimum ram is 4 Gigabytes. EveMarketTool should run on all CPUs that can run Java 1.8.
+EveMarketTool will run on almost all machines. Recommended minimum ram is 2 Gigabytes. EveMarketTool should run on all CPUs that can run Java 1.8. EveMarketTool is very lightweight, and the only noticable slow-down on older machines will be loading time.
 
 # Usage
 
@@ -14,9 +14,11 @@ EveMarketTool will run on almost all machines. Recommended minimum ram is 4 Giga
 
 ![First Tab Image](https://raw.githubusercontent.com/memcallen/EveMarketTool/master/docs/images/firsttabscreenshot.png)
 
- - Indicates the items you would like to query
+ - Indicates the item groups you would like to query
+ - *Should* be a one-to-one correlation with the in game groups
+   - The in game groups will most likely be in a different order, but should stay the same between updates
  - Select item groups with the left panel
-   - If you hover over the item group, it will show you the 'super' type of it, which represents the top group (ie. Ships, Ship Modificatons, Trade Goods, etc)
+   - If you hover over an item group, it will show you the 'super' type of it, which represents the top group (ie. Ships, Ship Modificatons, Trade Goods, etc)
  - Select individual items with the right panel
  - Both panels support searching, via the text input above both panels (Press enter to loop through all that match)
 
@@ -32,11 +34,12 @@ EveMarketTool will run on almost all machines. Recommended minimum ram is 4 Giga
    - Press 'Add' to add a new filter
    - The filter name goes in the left text box
    - The filter value goes in the right text box
-   - Check your decoders' documentation if they use the filters, not all decoders use the filters
+   - Check your decoders' documentation if they use the filters, not all decoders use the filters (See Generic Table Filters for the default ones) 
  - Press load to query the items
    - This takes a few seconds, don't press the button multiple times
-   - For queries less than 50 items, it will take approximately 5 seconds, but increases rapidly after 100 items
+   - For queries less than 50 items, it will take approximately 5-10 seconds, but increases rapidly after 100 items
  - The table can be sorted by clicking on the column headers
+ - The table columns can be re-ordered by dragging the headers
 
 
 ### Tab Three
@@ -46,7 +49,7 @@ EveMarketTool will run on almost all machines. Recommended minimum ram is 4 Giga
    - Add Cfg
      - Adds a new config
    - Open Cfg
-     - Opens a new cfg without needing to restart the application
+     - Opens a new config without needing to restart the application
    - Reload From File
      - Reloads the current config from file
    - Write To File
@@ -108,7 +111,7 @@ EveMarketTool uses LuaJ to parse and run the lua scripts. Currently, the default
 
 ### void filter:set(String, String)
  - Sets a property for the filter window
- - Properties are global unless EveMarketTool restarted
+ - Properties are global unless EveMarketTool is restarted
 
 ## Required Lua Methods
 
