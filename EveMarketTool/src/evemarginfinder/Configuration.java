@@ -6,13 +6,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -24,7 +27,7 @@ import javax.swing.JOptionPane;
  */
 public class Configuration {
 
-    //<editor-fold desc="Object Stuff">
+    //<editor-fold desc="Object Stuff" defaultstate="collapsed">
     @SuppressWarnings("FieldMayBeFinal")
     private HashMap<String, String> cfg = new HashMap<>();
 
@@ -91,11 +94,11 @@ public class Configuration {
     }
 
     //</editor-fold>
-    //<editor-fold desc="Static Stuff">
-    static List<Configuration> configs = new ArrayList();
-    static int current = 0;
-    static Path root = Paths.get("./");
-    static Configuration global;
+    //<editor-fold desc="Static Stuff" defaultstate="collapsed">
+    private static List<Configuration> configs = new ArrayList();
+    private static int current = 0;
+    private static Path root = Paths.get("./");
+    private static Configuration global;
 
     public static void initialize() {
 
@@ -146,14 +149,22 @@ public class Configuration {
         } catch (IOException ex) {
             Logger.getLogger(Configuration.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        if(configs.isEmpty()) {
-            JOptionPane.showMessageDialog(null, 
-                    "No Configurations found, try redownloading the program"
-                    , "No Configurations Found", JOptionPane.ERROR_MESSAGE);
+
+        if (configs.isEmpty()) {
+            JOptionPane.showMessageDialog(null,
+                    "No Configurations found, try redownloading the program",
+                     "No Configurations Found", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
         }
-        
+
+    }
+
+    public static void saveCurrent() {
+        try {
+            configs.get(current).save();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Configuration.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public static void reload(String name) {
@@ -205,8 +216,27 @@ public class Configuration {
         configs.add(c);
     }
 
-    public static void remove(String name) {
-        //TODO this
+    public static void removeCurrent(boolean save) throws IOException {
+        Configuration c = configs.get(current);
+        
+        Path new_file = c.file.toPath().resolveSibling(c.file.getName() + ".disabled");
+        Files.move(c.file.toPath(), new_file, StandardCopyOption.COPY_ATTRIBUTES);
+        
+        if (save) {
+            try {
+                c.file = new_file.toFile();
+                c.save();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Configuration.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        configs.remove(current);
+        
+        if(current >= configs.size()) {
+            current = configs.size() - 1;
+        }
+        
     }
 
     public static void setActive(String name) {
@@ -222,6 +252,14 @@ public class Configuration {
         return configs.get(current).name;
     }
 
+    public static int GetCurrent() {
+        return current;
+    }
+
+    public static void forEach(Consumer<Configuration> cnsmr) {
+        configs.forEach(cnsmr);
+    }
+
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Direct Manipulation">
     public static Stream<Entry<String, String>> stream() {
@@ -233,7 +271,7 @@ public class Configuration {
     }
 
     public static boolean has(String key) {
-        if(configs.isEmpty()){
+        if (configs.isEmpty()) {
             return false;
         }
         return configs.get(current)._has(key);
@@ -245,6 +283,7 @@ public class Configuration {
 
     public static void set(String key, String value) {
         configs.get(current)._set(key, value);
+        System.out.println("Setting " + key + " to " + value);
     }
     //</editor-fold>
 

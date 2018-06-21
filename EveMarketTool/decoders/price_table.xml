@@ -1,0 +1,9 @@
+<config>
+	
+	<table-generator>
+		
+		<name>Price Table</name>
+		<lua-file>price_table.lua</lua-file>
+		
+	</table-generator>
+</config>

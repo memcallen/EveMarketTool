@@ -10,12 +10,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -34,7 +37,7 @@ public final class MainFrame extends javax.swing.JFrame {
     public Entry<Integer, String>[] Items = null;
 
     public DefaultListModel model = new DefaultListModel();
-    public DefaultTableModel table_model;
+    public AbstractTableModel table_model;
 
     public final Vector<Vector> output_table_data = new Vector();
     public TableCellRenderer cell = new TableCellRenderer(output_table_data);
@@ -71,11 +74,32 @@ public final class MainFrame extends javax.swing.JFrame {
 
         ConsoleFrame.log("Doing table stuff");
 
-        table_model = new DefaultTableModel(output_table_data, QueryTranslator.table_headers) {
+        table_model = new AbstractTableModel() {
 
+            //output_table_data, QueryTranslator.table_headers
             @Override
             public Class<?> getColumnClass(int column) {
                 return QueryTranslator.table_classes[column];
+            }
+
+            @Override
+            public String getColumnName(int i) {
+                return QueryTranslator.table_headers.elementAt(i);
+            }
+
+            @Override
+            public int getRowCount() {
+                return output_table_data.size();
+            }
+
+            @Override
+            public int getColumnCount() {
+                return QueryTranslator.table_headers.size();
+            }
+
+            @Override
+            public Object getValueAt(int i, int i1) {
+                return output_table_data.get(i).get(i1);
             }
 
         };
@@ -425,7 +449,6 @@ public final class MainFrame extends javax.swing.JFrame {
         });
 
         cfg_remove.setText("Remove");
-        cfg_remove.setEnabled(false);
         cfg_remove.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cfg_removeActionPerformed(evt);
@@ -570,6 +593,11 @@ public final class MainFrame extends javax.swing.JFrame {
 
         selected_items_refresh.doClick();
 
+        // reload the headers on switch
+        QueryTranslator.loadHeaders();
+        
+        revalidateTable();
+        
     }//GEN-LAST:event_TabbedPaneStateChanged
 
     private void selected_items_refreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selected_items_refreshActionPerformed
@@ -725,7 +753,9 @@ public final class MainFrame extends javax.swing.JFrame {
 
         //TODO replace this
         //cell.setActive(use_filter.isSelected());
-        output_table.revalidate();
+        
+        revalidateTable();
+        
 
     }//GEN-LAST:event_use_filterActionPerformed
 
@@ -769,6 +799,7 @@ public final class MainFrame extends javax.swing.JFrame {
         String item = parse_decoder.getSelectedItem().toString();
 
         try {
+            Configuration.set("query-parser", item);
             QueryTranslator.setActiveParser(item);
         } catch (NullPointerException e) {
             JOptionPane.showMessageDialog(this, "Error: that decoder doesn't exist, this should never happen", "Error", JOptionPane.ERROR_MESSAGE);
@@ -799,17 +830,18 @@ public final class MainFrame extends javax.swing.JFrame {
         }
 
         String item = parse_table.getSelectedItem().toString();
-
+        
         try {
+            Configuration.set("query-table", item);
             QueryTranslator.setActiveTable(item);
         } catch (NullPointerException e) {
             JOptionPane.showMessageDialog(this, "Error: that table generator doesn't exist, this should never happen", "Error", JOptionPane.ERROR_MESSAGE);
         }
-
+        
     }//GEN-LAST:event_parse_tableActionPerformed
 
     private void cfg_writeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_writeActionPerformed
-        this.onexit(null);
+        Configuration.saveCurrent();
     }//GEN-LAST:event_cfg_writeActionPerformed
 
     private void config_selectorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_config_selectorActionPerformed
@@ -852,6 +884,10 @@ public final class MainFrame extends javax.swing.JFrame {
 
         String name = JOptionPane.showInputDialog(this, "Enter name:");
 
+        if(name == null) {
+            return;
+        }
+        
         Configuration.addNew(name);
         Configuration.setActive(name);
 
@@ -861,22 +897,36 @@ public final class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_cfg_addActionPerformed
 
     private void cfg_removeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_removeActionPerformed
-
+        
+        try {
+            Configuration.removeCurrent(false);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, ex, "Error removing configuration", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        refreshConfigSelector();
+        refreshConfigVisuals();
+        
     }//GEN-LAST:event_cfg_removeActionPerformed
 
     private void show_filtersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_show_filtersActionPerformed
         filter.setVisible(!filter.isVisible());
     }//GEN-LAST:event_show_filtersActionPerformed
 
+    public void revalidateTable() {
+        table_model.fireTableStructureChanged();
+        table_model.fireTableDataChanged();
+    }
+    
     public void refreshConfigSelector() {
 
         config_selector.removeAllItems();
 
-        Configuration.configs.forEach((s) -> {
+        Configuration.forEach((s) -> {
             config_selector.addItem(s.name);
         });
 
-        config_selector.setSelectedIndex(Configuration.current);
+        config_selector.setSelectedIndex(Configuration.GetCurrent());
 
     }
 
@@ -902,7 +952,7 @@ public final class MainFrame extends javax.swing.JFrame {
         for (int i = 0; i < QueryTranslator.table_generators.size(); i++) {
             QueryTranslator.XMLLuaConfig xml = QueryTranslator.table_generators.get(i);
             parse_table.addItem(xml.name);
-            if (xml == QueryTranslator.active_table) {
+            if (xml.name.equals(Configuration.get("query-table"))) {
                 index = i;
             }
         }
