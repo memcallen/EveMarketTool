@@ -23,43 +23,61 @@
  */
 package evemarginfinder;
 
-import java.awt.Color;
-import java.awt.Component;
 import java.util.List;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
+import java.util.function.Function;
+import javax.swing.AbstractListModel;
+import javax.swing.ComboBoxModel;
 
 /**
  *
  * @author Memcallen Kahoudi/Recursive Pineapple
  */
-public class TableCellRenderer extends DefaultTableCellRenderer {
+public class CustomComboBoxModel<T, R> extends AbstractListModel implements ComboBoxModel{
 
-    private final List<List> tdata;
-
-    public TableCellRenderer(List<List> tdata) {
-        this.tdata = tdata;
+    private Object selected;
+    private List<T> data;
+    
+    private Function<T, R> extractor;
+    
+    public CustomComboBoxModel(List<T> data) {
+        this.data = data;
+    }
+    
+    public CustomComboBoxModel(List<T> data, Function<T, R> elementExtractor) {
+        this(data);
+        this.extractor = elementExtractor;
+    }
+    
+    @Override
+    public int getSize() {
+        return data.size();
     }
 
     @Override
-    public Component getTableCellRendererComponent(JTable table,
-            Object value, boolean isSelected, boolean hasFocus, int row,
-            int column) {
-
-        Color color = QueryTranslator.getCellColors(table.convertRowIndexToModel(row), column, tdata);
-
-        Component c = super.getTableCellRendererComponent(table,
-                value, isSelected, hasFocus, row, column);
-
-        if (isSelected) {
-            c.setBackground(table.getSelectionBackground());
-            c.setForeground(table.getSelectionForeground());
-        } else {
-            c.setForeground(color);
-            c.setBackground(table.getBackground());
+    public Object getElementAt(int index) {
+        if(extractor != null) {
+            return extractor.apply(data.get(index));
+        }else{
+            return data.get(index);
         }
-        return c;
-
     }
 
+    public void fireDataChanged() {
+        fireContentsChanged(this, 0, getSize() - 1);
+    }
+    
+    public void setSelectedItem2(T item) {
+        setSelectedItem(extractor != null ? extractor.apply(item) : item);
+    }
+    
+    @Override
+    public void setSelectedItem(Object anItem) {
+        selected = anItem;
+    }
+
+    @Override
+    public Object getSelectedItem() {
+        return selected;
+    }
+    
 }

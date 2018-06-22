@@ -142,9 +142,6 @@
             <Component class="javax.swing.JButton" name="exit_button">
               <Properties>
                 <Property name="text" type="java.lang.String" value="X"/>
-                <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
-                  <Insets value="[0, 0, 0, 0]"/>
-                </Property>
                 <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[40, 20]"/>
                 </Property>

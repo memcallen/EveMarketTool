@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright 2018 memcallen
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package evemarginfinder;
 
 import com.google.gson.JsonElement;
@@ -61,7 +84,7 @@ public class DatabaseManager extends Thread {
 
     public static JsonParser parser = new JsonParser();
 
-    public static List<Vector> getMarketInfoBulk(int[] itemid, int sysid) throws IOException {
+    public static List<List> getMarketInfoBulk(int[] itemid, int sysid) throws IOException {
 
         String url = QueryTranslator.getURL(itemid, sysid, false);
 
@@ -78,7 +101,7 @@ public class DatabaseManager extends Thread {
 
         pre = System.currentTimeMillis();
 
-        List<Vector> out = QueryTranslator.getTableData(QueryTranslator.translate(itemid, response));
+        List<List> out = QueryTranslator.getTableData(QueryTranslator.translate(itemid, response));
 
         ConsoleFrame.log("Translated in " + (System.currentTimeMillis() - pre) + "ms");
 
@@ -231,8 +254,6 @@ public class DatabaseManager extends Thread {
 
         ConsoleFrame.log("Loading CheckBoxHandler");
 
-        CheckBoxHandler.setData(groups, items, itemgroup_lookup);
-
         Entry<Integer, String>[] entries_groups = new Entry[temp.size()];
 
         for (int i = 0; i < groups.length; i++) {
@@ -242,7 +263,7 @@ public class DatabaseManager extends Thread {
 
         ConsoleFrame.log("Loading Main Interface");
 
-        gui = new MainFrame(entries_groups, items, filterf);
+        gui = new MainFrame(groups, entries_groups, itemgroup_lookup, filterf);
 
         gui.setVisible(true);
 
@@ -262,8 +283,6 @@ public class DatabaseManager extends Thread {
         Configuration.initialize();
 
         QueryTranslator.initialize();
-
-        CheckBoxHandler.initialize();
 
         filterf = new FilterFrame();
         filterf.loadCfg();

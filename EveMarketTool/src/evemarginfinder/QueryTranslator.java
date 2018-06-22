@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright 2018 memcallen
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package evemarginfinder;
 
 import com.google.gson.JsonElement;
@@ -8,9 +31,9 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
@@ -98,19 +121,19 @@ public class QueryTranslator {
     private final static HashMap<String, Color> ROW_COLORS = new HashMap<>();
 
     //<editor-fold defaultstate="collapsed" desc="File Loaders">
-    public static Vector<XMLLuaConfig> query_parsers = new Vector();
-    public static Vector<XMLLuaConfig> table_generators = new Vector();
+    public static List<XMLLuaConfig> query_parsers = new ArrayList<>();
+    public static List<XMLLuaConfig> table_generators = new ArrayList<>();
 
     public static XMLLuaConfig active_parser;
     public static XMLLuaConfig active_table;
     
     public static Class[] table_classes;
 
-    public static Vector<String> table_headers = new Vector();
+    public static List<String> table_headers = new ArrayList<>();
 
     private static DocumentBuilder xml_builder;
 
-    public static Vector[] loadParser(File xml_file) throws SAXException, IOException {
+    public static List<XMLLuaConfig>[] loadParser(File xml_file) throws SAXException, IOException {
 
         if (xml_builder == null) {
             try {
@@ -127,8 +150,8 @@ public class QueryTranslator {
 
         Element root = doc.getDocumentElement();
 
-        Vector<XMLLuaConfig> queries = new Vector(),
-                tables = new Vector();
+        List<XMLLuaConfig> queries = new ArrayList(),
+                tables = new ArrayList();
 
         for (Node node = root.getFirstChild(); node != null; node = node.getNextSibling()) {
 
@@ -169,7 +192,12 @@ public class QueryTranslator {
 
         }
 
-        return new Vector[]{queries, tables};
+        List<XMLLuaConfig>[] out = new ArrayList[2];
+        
+        out[0] = queries;
+        out[1] = tables;
+        
+        return out;
 
     }
 
@@ -195,7 +223,7 @@ public class QueryTranslator {
 
             if (child.getName().endsWith("xml")) {
                 try {
-                    Vector[] parsers = loadParser(child);
+                    List[] parsers = loadParser(child);
                     query_parsers.addAll(parsers[0]);
                     table_generators.addAll(parsers[1]);
                 } catch (SAXException ex) {
@@ -351,7 +379,7 @@ public class QueryTranslator {
 
     }
 
-    public static Color getCellColors(int row, int column, List<Vector> data) {
+    public static Color getCellColors(int row, int column, List<List> data) {
 
         if (Boolean.parseBoolean(Configuration.get("do-table-color"))) {
 
@@ -366,9 +394,9 @@ public class QueryTranslator {
         ROW_COLORS.clear();
     }
     
-    public static List<Vector> getTableData(LuaValue queries_ret) {
+    public static List<List> getTableData(LuaValue queries_ret) {
 
-        List<Vector> out = new ArrayList<>();
+        List<List> out = new ArrayList<>();
 
         LuaValue buy = queries_ret.get(1);
         LuaValue sell = queries_ret.get(2);
@@ -401,7 +429,7 @@ public class QueryTranslator {
                 ROW_COLORS.put(props.get("name"), COLORS.get(props.get("color")));
             }
 
-            Vector v = new Vector();
+            List v = new ArrayList();
 
             for (int index = 1; index <= vals.length(); index++) {
 
