@@ -65,44 +65,54 @@ public class CheckBoxHandler extends Thread {
 
     //<editor-fold defaultstate="collapsed" desc="Variable Definitions">
     //'final' definitions
-    public static ItemGroup[] item_groups;
-    public static HashMap<Integer, ItemGroup> itemgroup_lookup_id = new HashMap<>();
-    public static Map.Entry<Integer, String>[] items = null;
+    public ItemGroup[] item_groups;
+    public HashMap<Integer, ItemGroup> itemgroup_lookup_id = new HashMap<>();
+    public Map.Entry<Integer, String>[] items = null;
 
     //layout stuff
-    public static TreePanelLayout ItemGroups_Layout = new TreePanelLayout();
-    public static HideableTreeNode ItemGroups_Root;
-    public static HashMap<HideableTreeNode, ItemGroup> TreeNode_Lookup2 = new HashMap<>();
-    public static HashMap<ItemGroup, HideableTreeNode> TreeNode_Lookup = new HashMap<>();
-    public static JCheckBox[] ItemGroups_CheckBoxes = null;
-    public static JCheckBox[] Items_CheckBoxes = null;
-    public static java.awt.GridLayout Items_Layout = new java.awt.GridLayout(0, 1);
-    public static JTextField SelectedCount;
+    public TreePanelLayout ItemGroups_Layout = new TreePanelLayout();
+    public HideableTreeNode ItemGroups_Root;
+    public HashMap<HideableTreeNode, ItemGroup> TreeNode_Lookup2 = new HashMap<>();
+    public HashMap<ItemGroup, HideableTreeNode> TreeNode_Lookup = new HashMap<>();
+    public JCheckBox[] ItemGroups_CheckBoxes = null;
+    public JCheckBox[] Items_CheckBoxes = null;
+    public java.awt.GridLayout Items_Layout = new java.awt.GridLayout(0, 1);
+    public JTextField SelectedCount;
 
     //the select queues
-    public static ConcurrentLinkedQueue<Integer> item_queue = new ConcurrentLinkedQueue<>();
-    public static ConcurrentLinkedQueue<Integer> group_queue = new ConcurrentLinkedQueue<>();
+    public ConcurrentLinkedQueue<Integer> item_queue = new ConcurrentLinkedQueue<>();
+    public ConcurrentLinkedQueue<Integer> group_queue = new ConcurrentLinkedQueue<>();
 
     //The deselect queues
-    public static ConcurrentLinkedQueue<Integer> item_queue_des = new ConcurrentLinkedQueue<>();
-    public static ConcurrentLinkedQueue<Integer> group_queue_des = new ConcurrentLinkedQueue<>();
+    public ConcurrentLinkedQueue<Integer> item_queue_des = new ConcurrentLinkedQueue<>();
+    public ConcurrentLinkedQueue<Integer> group_queue_des = new ConcurrentLinkedQueue<>();
 
     //the selections
-    public final static List<Integer> item_selection = Collections.synchronizedList(new ArrayList<>());
-    public final static List<Integer> group_selection = Collections.synchronizedList(new ArrayList<>());
+    public final List<Integer> item_selection = Collections.synchronizedList(new ArrayList<>());
+    public final List<Integer> group_selection = Collections.synchronizedList(new ArrayList<>());
 
     //selection info
-    private static volatile boolean initialized = false;
-    private static boolean items_changed = false;
-    private static int[] id_cache;
-    private static int[] group_cache;
+    private volatile boolean initialized = false;
+    private boolean items_changed = false;
+    private int[] id_cache;
+    private int[] group_cache;
     //</editor-fold>
 
-    private static Thread main;
+    private boolean main_initialized = false;
 
-    private static boolean main_initialized = false;
+    public CheckBoxHandler(ItemGroup[] item_groups, Map.Entry<Integer, String>[] items,
+            HashMap<Integer, ItemGroup> group_lookup) {
 
-    private static void checkSelections() {
+        setName("CheckBox-Checker");
+
+        setDaemon(true);
+
+        this.item_groups = item_groups;
+        this.items = items;
+        this.itemgroup_lookup_id = group_lookup;
+    }
+
+    private void checkSelections() {
         //adds items
         if (!item_queue.isEmpty()) {
             while (!item_queue.isEmpty()) {
@@ -138,7 +148,7 @@ public class CheckBoxHandler extends Thread {
 
     }
 
-    private static void getGroupItems(int start, IntStream.Builder items, IntStream.Builder groups) {
+    private void getGroupItems(int start, IntStream.Builder items, IntStream.Builder groups) {
 
         LinkedList<Integer> groupq = new LinkedList<>();
 
@@ -162,7 +172,7 @@ public class CheckBoxHandler extends Thread {
 
     }
 
-    public static int[] getItems() {
+    public int[] getItems() {
 
         if (id_cache == null) {
             return null;
@@ -174,7 +184,16 @@ public class CheckBoxHandler extends Thread {
         return array;
     }
 
-    public static int[] getGroups() {
+    /**
+     * The fast version of {@link getItems}. DO NOT EDIT THE RETURNED ARRAY
+     *
+     * @return The id cache array
+     */
+    public int[] getItemsConst() {
+        return id_cache;
+    }
+
+    public int[] getGroups() {
 
         if (group_cache == null) {
             return null;
@@ -185,7 +204,7 @@ public class CheckBoxHandler extends Thread {
         return array;
     }
 
-    public static void deselectAll() {
+    public void deselectAll() {
 
         if (items_changed) {
             updateCaches();
@@ -239,7 +258,7 @@ public class CheckBoxHandler extends Thread {
         return false;
     }
 
-    private static void updateCaches() {
+    private void updateCaches() {
 
         IntStream.Builder item_stream = IntStream.builder();
 
@@ -263,7 +282,7 @@ public class CheckBoxHandler extends Thread {
 
     }
 
-    private static void updateCheckBoxes() {
+    private void updateCheckBoxes() {
 
         for (int i = 0; i < ItemGroups_CheckBoxes.length; i++) {
             ItemGroups_CheckBoxes[i].setSelected(contains(group_cache, item_groups[i].id));
@@ -280,26 +299,29 @@ public class CheckBoxHandler extends Thread {
 
     /**
      * Finds the next item group tree-wise after <after>
+     *
      * @param substring The text to find in the itemgroup name
-     * @param after The itemgroup to continue after, or null to start at the beginning
+     * @param after The itemgroup to continue after, or null to start at the
+     * beginning
      * @return The next itemgroup, or null at the end of the list
-     * @throws IllegalArgumentException Not an actual exception, just a means of giving the caller an error message
-     *  which is not likely to be thrown within the body of the function
+     * @throws IllegalArgumentException Not an actual exception, just a means of
+     * giving the caller an error message which is not likely to be thrown
+     * within the body of the function
      */
-    public static ItemGroup findGroup(String substring, ItemGroup after) throws IllegalArgumentException {
+    public ItemGroup findGroup(String substring, ItemGroup after) throws IllegalArgumentException {
 
         //if after isnt null, it will look for the group
         boolean found = after == null;
         boolean anyfound = false;
 
         for (NodeIteratorInfo<Component> info : ItemGroups_Root) {
-            
+
             ItemGroup ig = TreeNode_Lookup2.get(info.node);
 
-            if(ig == null) {
+            if (ig == null) {
                 continue;
             }
-            
+
             // this is a weird if layout, but it works
             if (ig.name.toLowerCase().contains(substring)) {
                 anyfound = true;
@@ -320,20 +342,22 @@ public class CheckBoxHandler extends Thread {
     }
 
     /**
-     * Sets a node's parents visible, and returns the node's component information
+     * Sets a node's parents visible, and returns the node's component
+     * information
+     *
      * @param group The itemgroup to look for
      * @return The node, or null if no group found
      */
-    public static HideableTreeNode showBoxesTo(ItemGroup group) {
+    public HideableTreeNode showBoxesTo(ItemGroup group) {
 
         HideableTreeNode group_node = TreeNode_Lookup.get(group);
-        
-        if(group_node == null) {
+
+        if (group_node == null) {
             return null;
         }
-        
+
         HideableTreeNode retnode = group_node;
-        
+
         while (group_node != null) {
             group_node.setState(true);
             if (group_node.parent instanceof HideableTreeNode) {
@@ -347,25 +371,7 @@ public class CheckBoxHandler extends Thread {
     }
 
     //<editor-fold desc="Initialization Stuff" defaultstate="collapsed">
-    public static void initialize() {
-
-        if (main != null) {
-            if (main.isAlive()) {
-                main.interrupt();
-            }
-        }
-
-        main = new CheckBoxHandler();
-
-        main.setName("CheckBox-Checker");
-
-        main.setDaemon(true);
-
-        main.start();
-
-    }
-
-    public static void initializeCheckBoxes(JPanel item_group_panel, JPanel item_panel) {
+    public void initializeCheckBoxes(JPanel item_group_panel, JPanel item_panel) {
 
         ConsoleFrame.log("Checkboxes - Initing stuff");
 
@@ -449,7 +455,7 @@ public class CheckBoxHandler extends Thread {
 
     }
 
-    public static void buildCheckBoxTree(JPanel tree_panel) {
+    public void buildCheckBoxTree(JPanel tree_panel) {
 
         ConsoleFrame.log("Checkboxes - Configuring Groups");
 
@@ -493,14 +499,7 @@ public class CheckBoxHandler extends Thread {
         return a.isLeaf() ? 1 : 0;
     }
 
-    public static void setData(ItemGroup[] item_groups, Map.Entry<Integer, String>[] items,
-            HashMap<Integer, ItemGroup> group_lookup) {
-        CheckBoxHandler.item_groups = item_groups;
-        CheckBoxHandler.items = items;
-        CheckBoxHandler.itemgroup_lookup_id = group_lookup;
-    }
-
-    public static void setNumCounter(JTextField counter) {
+    public void setNumCounter(JTextField counter) {
         SelectedCount = counter;
     }
 
