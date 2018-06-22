@@ -1,31 +1,14 @@
 package evemarginfinder;
 
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.LayoutManager;
+import evemarginfinder.EventQueue.EventType;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map.Entry;
-import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.DefaultListModel;
-import javax.swing.JCheckBox;
+import java.util.function.Consumer;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.event.ChangeEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
-import org.luaj.vm2.LuaError;
-import treepanel.HideableTreeNode;
-import treepanel.TreePanelLayout;
 
 /**
  *
@@ -33,117 +16,27 @@ import treepanel.TreePanelLayout;
  */
 public final class MainFrame extends javax.swing.JFrame {
 
-    public Entry<Integer, String>[] ItemGroups = null;
-    public Entry<Integer, String>[] Items = null;
+    public InterfaceController controller;
+    public EventQueue equeue;
+    public CheckBoxHandler cbh;
 
-    public DefaultListModel model = new DefaultListModel();
-    public AbstractTableModel table_model;
+    public MainFrame(ItemGroup[] item_groups, Entry<Integer, String>[] entries_items,
+            HashMap<Integer, ItemGroup> group_lookup, FilterFrame filter) {
 
-    public final Vector<Vector> output_table_data = new Vector();
-    public TableCellRenderer cell = new TableCellRenderer(output_table_data);
+        equeue = new EventQueue();
 
-    private String group_search_text = null;
-    private List<ItemGroup> cached_group_results = null;
-    private Font old_group_font = null;
-    private Component current_font_comp = null;
-    private Component current_group_comp = null;
+        equeue.run();
 
-    public ItemGroup group_last_ig = null;
-    public int item_search_index = 0;
+        cbh = new CheckBoxHandler(item_groups, entries_items, group_lookup);
 
-    private static int sysid = 30000142;
+        controller = new InterfaceController(this, filter, equeue, cbh);
 
-    private static Thread current_query;
-
-    @SuppressWarnings("FieldMayBeFinal")
-    private FilterFrame filter;
-
-    public MainFrame(Entry<Integer, String>[] entries_groups, Entry<Integer, String>[] entries_items, FilterFrame filter) {
-
-        ConsoleFrame.log("Loading laf");
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-
-        ConsoleFrame.log("Doing table stuff");
-
-        table_model = new AbstractTableModel() {
-
-            //output_table_data, QueryTranslator.table_headers
-            @Override
-            public Class<?> getColumnClass(int column) {
-                return QueryTranslator.table_classes[column];
-            }
-
-            @Override
-            public String getColumnName(int i) {
-                return QueryTranslator.table_headers.elementAt(i);
-            }
-
-            @Override
-            public int getRowCount() {
-                return output_table_data.size();
-            }
-
-            @Override
-            public int getColumnCount() {
-                return QueryTranslator.table_headers.size();
-            }
-
-            @Override
-            public Object getValueAt(int i, int i1) {
-                return output_table_data.get(i).get(i1);
-            }
-
-        };
+        controller.pre_component_init();
 
         ConsoleFrame.log("Initing components");
         initComponents();
 
-        GroupScroll.getVerticalScrollBar().setUnitIncrement(20);
-        ItemScroll.getVerticalScrollBar().setUnitIncrement(20);
-
-        ItemPanel.setLayout(new OptimizedScrollPaneLayout(ItemScroll.getViewport()::getViewRect));
-        ItemScroll.getViewport().addChangeListener((ChangeEvent e) -> {
-            ItemScroll.getViewport().revalidate();
-        });
-
-        TableColumnModel tcm = output_table.getColumnModel();
-
-        for (int i = 0; i < tcm.getColumnCount(); i++) {
-            tcm.getColumn(i).setCellRenderer(cell);
-        }
-
-        TableRowSorter<TableModel> sorter = new TableRowSorter(output_table.getModel());
-
-        output_table.setRowSorter(sorter);
-
-        ItemGroups = entries_groups;
-        Items = entries_items;
-        this.filter = filter;
-
-        ConsoleFrame.log("Initing Check Boxes");
-        CheckBoxHandler.initializeCheckBoxes(ItemGroupPanel, ItemPanel);
-        CheckBoxHandler.setNumCounter(NumSelected);
-
-        LayoutManager layout = ItemGroupPanel.getLayout();
-        if (layout instanceof TreePanelLayout) {
-            ((TreePanelLayout) layout).addLayoutEventListener(this::updateGroupScrollPosition);
-        } else {
-            ConsoleFrame.log_error("Warning: ItemGroup Panel doesn't have a TreePanelLayout");
-        }
-
-        ConsoleFrame.log("Loading ConfigBox Model");
-
-        refreshConfigSelector();
-        refreshConfigVisuals();
+        controller.post_component_init(GroupScroll, ItemScroll, ItemGroupPanel, ItemPanel, output_table, NumSelected);
 
         ConsoleFrame.log("Packing");
         pack();
@@ -174,10 +67,8 @@ public final class MainFrame extends javax.swing.JFrame {
         load_items = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         selected_items = new javax.swing.JList();
-        selected_items_refresh = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        output_table = new javax.swing.JTable(table_model);
-        use_filter = new javax.swing.JCheckBox();
+        output_table = new javax.swing.JTable(controller.table_model);
         jLabel8 = new javax.swing.JLabel();
         system_id = new javax.swing.JTextField();
         rem_inv = new javax.swing.JCheckBox();
@@ -206,11 +97,6 @@ public final class MainFrame extends javax.swing.JFrame {
         setTitle("Eve Market Tool");
         setLocationByPlatform(true);
         setResizable(false);
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowClosed(java.awt.event.WindowEvent evt) {
-                onexit(evt);
-            }
-        });
         getContentPane().setLayout(new java.awt.GridLayout(1, 1));
 
         TabbedPane.setFont(TabbedPane.getFont());
@@ -291,22 +177,13 @@ public final class MainFrame extends javax.swing.JFrame {
                 load_itemsActionPerformed(evt);
             }
         });
-        InfoPanel.add(load_items, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 300, -1, -1));
+        InfoPanel.add(load_items, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 290, -1, -1));
 
         selected_items.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        selected_items.setModel(model);
+        selected_items.setModel(controller.selected_items_model);
         jScrollPane3.setViewportView(selected_items);
 
         InfoPanel.add(jScrollPane3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 40, 120, 360));
-
-        selected_items_refresh.setFont(selected_items_refresh.getFont());
-        selected_items_refresh.setText("Refresh");
-        selected_items_refresh.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selected_items_refreshActionPerformed(evt);
-            }
-        });
-        InfoPanel.add(selected_items_refresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 30, -1, -1));
 
         jScrollPane1.setDoubleBuffered(true);
 
@@ -314,25 +191,11 @@ public final class MainFrame extends javax.swing.JFrame {
 
         InfoPanel.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 10, 500, 390));
 
-        use_filter.setFont(use_filter.getFont());
-        use_filter.setText("Use Filter");
-        use_filter.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                use_filterActionPerformed(evt);
-            }
-        });
-        InfoPanel.add(use_filter, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 250, -1, -1));
-
         jLabel8.setFont(jLabel8.getFont());
         jLabel8.setText("Station/Region");
         InfoPanel.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 200, -1, -1));
 
         system_id.setText("60003760");
-        system_id.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                system_idFocusLost(evt);
-            }
-        });
         system_id.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 system_idKeyTyped(evt);
@@ -341,10 +204,10 @@ public final class MainFrame extends javax.swing.JFrame {
         InfoPanel.add(system_id, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 220, 80, -1));
 
         rem_inv.setFont(rem_inv.getFont());
-        rem_inv.setText("Remove Invalids");
-        InfoPanel.add(rem_inv, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 270, -1, -1));
+        rem_inv.setText("Remove Invalid");
+        InfoPanel.add(rem_inv, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 260, -1, -1));
 
-        show_filters.setText("Show Filters");
+        show_filters.setText("Edit Filters");
         show_filters.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 show_filtersActionPerformed(evt);
@@ -356,7 +219,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Response Parsing"));
 
-        parse_decoder.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Fuzzworks" }));
+        parse_decoder.setModel(controller.parse_decoder_model);
         parse_decoder.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 parse_decoderActionPerformed(evt);
@@ -367,14 +230,14 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jLabel13.setText("Table Generator:");
 
-        parse_table.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Generic Table" }));
+        parse_table.setModel(controller.parse_table_model);
         parse_table.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 parse_tableActionPerformed(evt);
             }
         });
 
-        parse_reload.setText("Reload Parser Configs");
+        parse_reload.setText("Reload Parsing Configs");
         parse_reload.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 parse_reloadActionPerformed(evt);
@@ -387,18 +250,17 @@ public final class MainFrame extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel12)
-                    .addComponent(jLabel13))
-                .addGap(9, 9, 9)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(parse_decoder, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(parse_table, 0, 148, Short.MAX_VALUE))
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(parse_reload)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel12)
+                            .addComponent(jLabel13))
+                        .addGap(9, 9, 9)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(parse_decoder, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(parse_table, 0, 148, Short.MAX_VALUE))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(parse_reload)
-                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -412,15 +274,14 @@ public final class MainFrame extends javax.swing.JFrame {
                     .addComponent(jLabel13)
                     .addComponent(parse_table, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(parse_reload)
-                .addContainerGap())
+                .addComponent(parse_reload))
         );
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Config File"));
 
         jLabel14.setText("Current Config:");
 
-        config_selector.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        config_selector.setModel(controller.config_selector_model);
         config_selector.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 config_selectorActionPerformed(evt);
@@ -522,7 +383,7 @@ public final class MainFrame extends javax.swing.JFrame {
                 .addGroup(SettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(275, Short.MAX_VALUE))
+                .addContainerGap(253, Short.MAX_VALUE))
         );
 
         TabbedPane.addTab("Settings", SettingsPanel);
@@ -534,56 +395,19 @@ public final class MainFrame extends javax.swing.JFrame {
 
     private void deselectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deselectActionPerformed
 
-        CheckBoxHandler.deselectAll();
+        equeue.queueEvent(EventType.DESELECT_ALL);
 
     }//GEN-LAST:event_deselectActionPerformed
-
-    private void updateGroupScrollPosition() {
-
-        if (current_group_comp != null) {
-            int amount = current_group_comp.getY();
-
-            GroupScroll.getVerticalScrollBar().setValue(amount);
-            current_group_comp = null;
-        }
-    }
 
     private void ItemGroupSearchKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ItemGroupSearchKeyTyped
 
         if (evt.getKeyChar() == '\n') {
 
-            String field_text = ItemGroupSearch.getText().toLowerCase();
+            equeue.queueEvent(EventType.GROUP_SEARCH, ItemGroupSearch.getText().toLowerCase());
 
-            // if result already cached, use it, otherwise recalculate it
-            if (!field_text.equals(group_search_text)) {
-                group_last_ig = null;
-                group_search_text = field_text;
-                cached_group_results = null;
-            }
+        } else {
 
-            try {
-                group_last_ig = CheckBoxHandler.findGroup(field_text, group_last_ig);
-            } catch (IllegalArgumentException e) {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-                group_last_ig = null;
-                return; // don't search on error
-            }
-
-            HideableTreeNode node = CheckBoxHandler.showBoxesTo(group_last_ig);
-
-            if (current_font_comp != null) {
-                current_font_comp.setFont(old_group_font);
-            }
-
-            current_group_comp = node.GetValue();
-            current_font_comp = node.GetComp();
-            old_group_font = current_font_comp.getFont();
-
-            Font font = new Font(old_group_font.getName(), Font.BOLD, old_group_font.getSize());
-
-            current_font_comp.setFont(font);
-
-            current_group_comp.revalidate();
+            equeue.queueEvent(EventType.STOP_GROUP_SEARCH);
 
         }
 
@@ -591,266 +415,86 @@ public final class MainFrame extends javax.swing.JFrame {
 
     private void TabbedPaneStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_TabbedPaneStateChanged
 
-        selected_items_refresh.doClick();
+        equeue.queueEvent(EventType.REVALIDATE_ITEMLIST);
+        equeue.queueEvent(EventType.REVALIDATE_TABLE_HEADERS);
+        equeue.queueEvent(EventType.REVALIDATE_TABLE_DATA);
 
-        // reload the headers on switch
-        QueryTranslator.loadHeaders();
-        
-        revalidateTable();
-        
     }//GEN-LAST:event_TabbedPaneStateChanged
-
-    private void selected_items_refreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selected_items_refreshActionPerformed
-
-        model.clear();
-
-        for (int i : CheckBoxHandler.getItems()) {
-            String s = DatabaseManager.queryItemName(i);
-            if (s == null) {
-                ConsoleFrame.log_error("Warning: tried to get un-named item, database is corrupt");
-                JOptionPane.showMessageDialog(this,
-                        "Warning: database might be corrupt, will probably give errors/incorrect numbers", "Database is Corrupted", JOptionPane.WARNING_MESSAGE);
-            }
-            model.addElement(s);
-        }
-
-        selected_items.repaint();
-
-    }//GEN-LAST:event_selected_items_refreshActionPerformed
 
     @SuppressWarnings("CallToPrintStackTrace")
     private void load_itemsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_load_itemsActionPerformed
 
-        if (current_query != null) {
-            if (current_query.isAlive()) {
-                current_query.interrupt();
-            }
-        }
+        equeue.queueEvent(EventType.START_QUERY);
 
-        QueryTranslator.onNewQuery();
-
-        current_query = new Thread(() -> {
-
-            output_table_data.clear();
-
-            output_table_data.setSize(0);
-
-            String sys = system_id.getText();
-            if (sys.matches("\\d+")) {
-                sysid = Integer.valueOf(sys);
-            } else {
-                sysid = DatabaseManager.querySystemId(sys);
-            }
-
-            if (sysid == -1) {
-                JOptionPane.showMessageDialog(this, "Invalid System ID/Name", "Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            int[] ids = CheckBoxHandler.getItems();
-
-            if (ids == null) {
-                return;
-            }
-
-            int numperquery = 20;
-
-            if (ids.length > numperquery) {
-
-                int i = ids.length;
-
-                while (i > 0) {
-
-                    int[] subids = Arrays.copyOfRange(ids, Math.max(0, i - numperquery), i);
-
-                    try {
-                        output_table_data.addAll(DatabaseManager.getMarketInfoBulk(subids, sysid));
-                    } catch (LuaError e) {
-                        e.printStackTrace();
-                        JOptionPane.showMessageDialog(null,
-                                e.getMessage().length() > 100 ? e.getMessage().substring(0, 100) + "..." : e.getMessage(),
-                                "Error in lua script", JOptionPane.ERROR_MESSAGE);
-                        ConsoleFrame.log_error(e.getMessage());
-                        break;
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        JOptionPane.showMessageDialog(null,
-                                e.getMessage().length() > 100 ? e.getMessage().substring(0, 100) + "..." : e.getMessage(),
-                                "Error Connecting to API", JOptionPane.ERROR_MESSAGE);
-                        ConsoleFrame.log_error(e.getMessage());
-                        break;
-                    }
-
-                    i -= numperquery;
-
-                }
-
-            } else {
-
-                try {
-                    output_table_data.addAll(DatabaseManager.getMarketInfoBulk(ids, sysid));
-                } catch (LuaError e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(null,
-                            e.getMessage().length() > 100 ? e.getMessage().substring(0, 100) + "..." : e.getMessage(),
-                            "Error in lua script", JOptionPane.ERROR_MESSAGE);
-                    ConsoleFrame.log_error(e.getMessage());
-                    return;
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(null,
-                            e.getMessage().length() > 100 ? e.getMessage().substring(0, 100) + "..." : e.getMessage(),
-                            "Error Connecting to API", JOptionPane.ERROR_MESSAGE);
-                    ConsoleFrame.log_error(e.getMessage());
-                    return;
-                }
-
-            }
-
-            if (rem_inv.isSelected()) {
-                output_table_data.removeIf(v -> Double.isNaN((double) v.get(1)) || Double.isInfinite((double) v.get(1)));
-            }
-
-            table_model.fireTableDataChanged();
-
-            output_table.doLayout();
-
-            output_table.revalidate();
-
-            output_table.repaint();
-
-            current_query.interrupt();
-        });
-
-        current_query.setName("query-thread");
-
-        current_query.start();
     }//GEN-LAST:event_load_itemsActionPerformed
 
     private void ItemSearchKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_ItemSearchKeyTyped
 
         if (evt.getKeyChar() == '\n') {
-            int found = 0;
-            for (JCheckBox box : CheckBoxHandler.Items_CheckBoxes) {
-                if (box.getText().toLowerCase().contains(ItemSearch.getText().toLowerCase())) {
-                    found++;
-                    if (found > item_search_index) {
-                        item_search_index++;
-                        ItemScroll.getVerticalScrollBar().setValue(box.getY());
-                        return;
-                    }
-                }
-            }
+
+            equeue.queueEvent(EventType.ITEM_SEARCH, ItemSearch.getText());
+
+        } else {
+
+            equeue.queueEvent(EventType.STOP_ITEM_SEARCH);
+
         }
 
-        item_search_index = 0;
-
     }//GEN-LAST:event_ItemSearchKeyTyped
-
-    private void use_filterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_use_filterActionPerformed
-
-        //TODO replace this
-        //cell.setActive(use_filter.isSelected());
-        
-        revalidateTable();
-        
-
-    }//GEN-LAST:event_use_filterActionPerformed
 
     private void system_idKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_system_idKeyTyped
 
         if (evt.getKeyChar() == '\n') {
 
-            this.requestFocusInWindow();//hacky way to call focus_lost (also looks better)
+            equeue.queueEvent(EventType.SET_SYS_CALLBACK, system_id.getText(), (Consumer<String>) system_id::setToolTipText);
 
         }
-
 
     }//GEN-LAST:event_system_idKeyTyped
 
-    private void system_idFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_system_idFocusLost
-
-        String sys = system_id.getText();
-        if (sys.matches("\\d+")) {
-            sysid = Integer.valueOf(sys);
-        } else {
-            sysid = DatabaseManager.querySystemId(sys);
-        }
-
-        String name = DatabaseManager.querySystemName(sysid);
-
-        if (name != null) {
-            system_id.setToolTipText(name);
-        } else {
-            JOptionPane.showMessageDialog(this, "Could not find system " + sys,
-                    "Error finding system", JOptionPane.ERROR_MESSAGE);
-        }
-
-    }//GEN-LAST:event_system_idFocusLost
-
     private void parse_decoderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parse_decoderActionPerformed
 
-        if (parse_decoder.getItemCount() == 0) {
+        if (parse_decoder.getItemCount() == 0 || parse_decoder.getSelectedItem() == null) {
             return;
         }
 
-        String item = parse_decoder.getSelectedItem().toString();
-
-        try {
-            Configuration.set("query-parser", item);
-            QueryTranslator.setActiveParser(item);
-        } catch (NullPointerException e) {
-            JOptionPane.showMessageDialog(this, "Error: that decoder doesn't exist, this should never happen", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        equeue.queueEvent(EventType.SET_PARSER, parse_decoder.getSelectedItem().toString());
 
     }//GEN-LAST:event_parse_decoderActionPerformed
 
-    private void onexit(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_onexit
-
-    }//GEN-LAST:event_onexit
-
     private void cfg_reloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_reloadActionPerformed
-        Configuration.reloadCurrent();
 
-        refreshConfigVisuals();
+        equeue.queueEvent(EventType.RELOAD_CURR_CONFIG);
+
     }//GEN-LAST:event_cfg_reloadActionPerformed
 
     private void parse_reloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parse_reloadActionPerformed
-        QueryTranslator.loadParsers();
 
-        refreshConfigVisuals();
+        equeue.queueEvent(EventType.FORCE_RELOAD_LUA);
+
     }//GEN-LAST:event_parse_reloadActionPerformed
 
     private void parse_tableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parse_tableActionPerformed
 
-        if (parse_table.getItemCount() == 0) {
+        if (parse_table.getItemCount() == 0 || parse_table.getSelectedItem() == null) {
             return;
         }
 
-        String item = parse_table.getSelectedItem().toString();
-        
-        try {
-            Configuration.set("query-table", item);
-            QueryTranslator.setActiveTable(item);
-        } catch (NullPointerException e) {
-            JOptionPane.showMessageDialog(this, "Error: that table generator doesn't exist, this should never happen", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-        
+        equeue.queueEvent(EventType.SET_GENERATOR, parse_table.getSelectedItem().toString());
+
     }//GEN-LAST:event_parse_tableActionPerformed
 
     private void cfg_writeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_writeActionPerformed
-        Configuration.saveCurrent();
+
+        equeue.queueEvent(EventType.SAVE_CURR_CONFIG);
+
     }//GEN-LAST:event_cfg_writeActionPerformed
 
     private void config_selectorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_config_selectorActionPerformed
 
         if (config_selector.getSelectedItem() != null) {
-            Configuration.setActive(config_selector.getSelectedItem().toString());
+            equeue.queueEvent(EventType.SET_CONFIG, config_selector.getSelectedItem().toString());
         }
-        refreshConfigVisuals();
-        refreshConfigSelector();
 
     }//GEN-LAST:event_config_selectorActionPerformed
 
@@ -858,25 +502,17 @@ public final class MainFrame extends javax.swing.JFrame {
 
         JFileChooser chooser = new JFileChooser();
 
-        chooser.setCurrentDirectory(new File("./")); // does this work on windows?
+        chooser.setCurrentDirectory(new File("."));
 
-        chooser.setFileFilter(new FileNameExtensionFilter("Config", "cfg"));
+        chooser.setFileFilter(new FileNameExtensionFilter("Config", "emt.cfg"));
 
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 
-            try {
-                Configuration.loadFromFile(chooser.getSelectedFile());
-                refreshConfigSelector();
-            } catch (FileNotFoundException ex) {
-                JOptionPane.showMessageDialog(this,
-                        "Error: could not load " + chooser.getSelectedFile().getAbsolutePath(),
-                        "File Not Found Exception", JOptionPane.ERROR_MESSAGE);
-            }
+            equeue.queueEvent(EventType.OPEN_NEW_CONFIG, chooser.getSelectedFile(),
+                    (Consumer<FileNotFoundException>) ((ex) -> JOptionPane.showMessageDialog(this,
+                            ex.getMessage(), "Could not load file", JOptionPane.ERROR_MESSAGE)));
 
         }
-
-        refreshConfigSelector();
-        refreshConfigVisuals();
 
     }//GEN-LAST:event_open_newActionPerformed
 
@@ -884,82 +520,31 @@ public final class MainFrame extends javax.swing.JFrame {
 
         String name = JOptionPane.showInputDialog(this, "Enter name:");
 
-        if(name == null) {
+        if (name == null) {
             return;
         }
         
-        Configuration.addNew(name);
-        Configuration.setActive(name);
-
-        refreshConfigSelector();
-        refreshConfigVisuals();
-
+        equeue.queueEvent(EventType.CREATE_CONFIG, name);
+        
     }//GEN-LAST:event_cfg_addActionPerformed
 
     private void cfg_removeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_removeActionPerformed
+
+        int choice = JOptionPane.showConfirmDialog(this, "Save Config?");
         
-        try {
-            Configuration.removeCurrent(false);
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, ex, "Error removing configuration", JOptionPane.ERROR_MESSAGE);
+        if(choice == JOptionPane.CANCEL_OPTION) {
+            return;
         }
         
-        refreshConfigSelector();
-        refreshConfigVisuals();
+        equeue.queueEvent(EventType.REMOVE_CURR_CONFIG, choice == JOptionPane.YES_OPTION);
         
     }//GEN-LAST:event_cfg_removeActionPerformed
 
     private void show_filtersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_show_filtersActionPerformed
-        filter.setVisible(!filter.isVisible());
+        
+        equeue.queueEvent(EventType.EDIT_FILTERS);
+        
     }//GEN-LAST:event_show_filtersActionPerformed
-
-    public void revalidateTable() {
-        table_model.fireTableStructureChanged();
-        table_model.fireTableDataChanged();
-    }
-    
-    public void refreshConfigSelector() {
-
-        config_selector.removeAllItems();
-
-        Configuration.forEach((s) -> {
-            config_selector.addItem(s.name);
-        });
-
-        config_selector.setSelectedIndex(Configuration.GetCurrent());
-
-    }
-
-    public void refreshConfigVisuals() {
-        int index = 0;
-
-        parse_decoder.removeAllItems();
-
-        for (int i = 0; i < QueryTranslator.query_parsers.size(); i++) {
-            QueryTranslator.XMLLuaConfig xml = QueryTranslator.query_parsers.get(i);
-            parse_decoder.addItem(xml.name);
-            if (xml.name.equals(Configuration.get("query-parser"))) {
-                index = i;
-            }
-        }
-
-        parse_decoder.setSelectedIndex(index);
-
-        index = 0;
-
-        parse_table.removeAllItems();
-
-        for (int i = 0; i < QueryTranslator.table_generators.size(); i++) {
-            QueryTranslator.XMLLuaConfig xml = QueryTranslator.table_generators.get(i);
-            parse_table.addItem(xml.name);
-            if (xml.name.equals(Configuration.get("query-table"))) {
-                index = i;
-            }
-        }
-
-        parse_table.setSelectedIndex(index);
-
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane GroupScroll;
@@ -1001,9 +586,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> parse_table;
     private javax.swing.JCheckBox rem_inv;
     private javax.swing.JList selected_items;
-    private javax.swing.JButton selected_items_refresh;
     private javax.swing.JButton show_filters;
     private javax.swing.JTextField system_id;
-    private javax.swing.JCheckBox use_filter;
     // End of variables declaration//GEN-END:variables
 }
