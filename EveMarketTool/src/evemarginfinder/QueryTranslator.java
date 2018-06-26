@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -120,6 +119,11 @@ public class QueryTranslator {
     public final static HashMap<String, Color> COLORS = new HashMap<>();
     private final static HashMap<String, Color> ROW_COLORS = new HashMap<>();
 
+    public static final int
+            AREA_STATION = 0,
+            AREA_SYSTEM = 1,
+            AREA_REGION = 2;
+    
     //<editor-fold defaultstate="collapsed" desc="File Loaders">
     public static List<XMLLuaConfig> query_parsers = new ArrayList<>();
     public static List<XMLLuaConfig> table_generators = new ArrayList<>();
@@ -456,11 +460,11 @@ public class QueryTranslator {
         return ret;
     }
 
-    public static String getURL(int[] itemids, int systemid, boolean is_system) {
+    public static String getURL(int[] itemids, int systemid, int area_type) {
         
         typeFunc.types = itemids;
         
-        LuaValue ret = root.get("getURL").call(CoerceJavaToLua.coerce(systemid), CoerceJavaToLua.coerce(is_system));
+        LuaValue ret = root.get("getURL").call(CoerceJavaToLua.coerce(systemid), CoerceJavaToLua.coerce(area_type));
         
         if(!ret.isstring()) {
             throw new LuaError("getURL returned non-string");
