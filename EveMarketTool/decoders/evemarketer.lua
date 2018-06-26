@@ -25,10 +25,14 @@ function getURL(sysid, system)
 	
 	url = url .. types
 	
-	if system then
-		url = url .. "regionlimit=" .. sysid
+	if system == 0 then
+		--station (no option for this api)
+	elseif system == 1 then
+		--system (usesystem=##)
+		url = url .. "usesystem=" .. sysid
 	else
-		url = url .. "stationlimit=" .. sysid
+		--region (regionlimit=##)
+		url = url .. "regionlimit=" .. sysid
 	end
 	
 	return url
@@ -57,7 +61,8 @@ function translate(json)
 		
 		el = root:get(k - 1):getAsJsonObject()
 		
-		print(k, id, el)
+		-- debug print
+		--print(k, id, el)
 		
 		table.insert(buy, convert(el:get("buy"):getAsJsonObject()))
 		table.insert(sell, convert(el:get("sell"):getAsJsonObject()))

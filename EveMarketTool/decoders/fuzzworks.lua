@@ -1,6 +1,11 @@
 
 function getURL(sysid, system)
-	url = "https://market.fuzzwork.co.uk/aggregates/?types="
+	
+	prefixes = {"station", "system", "region"}
+		
+	systext = prefixes[system + 1] .. "=" .. sysid
+	
+	url = "https://market.fuzzwork.co.uk/aggregates/?" .. systext .. "&types="
 	
 	types = ""
 	
@@ -13,9 +18,7 @@ function getURL(sysid, system)
 	
 	for i, v in pairs(t) do
 		
-        if i == size then
-            c = '&'
-        else
+        if i < size then
            c = ','
         end
         
@@ -23,15 +26,7 @@ function getURL(sysid, system)
 		
 	end
 	
-	url = url .. types
-	
-	if system then
-		url = url .. "region=" .. sysid
-	else
-		url = url .. "station=" .. sysid
-	end
-	
-	return url
+	return url .. types
 end
 
 function convert(id, root)
