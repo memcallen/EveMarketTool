@@ -266,6 +266,7 @@ public class Configuration {
         for (int i = 0; i < configs.size(); i++) {
             if (configs.get(i).name.equals(name)) {
                 current = i;
+                System.out.println("Set config to " + i);
                 return;
             }
         }

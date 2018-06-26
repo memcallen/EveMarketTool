@@ -85,7 +85,8 @@ public class InterfaceController {
     public int item_search_index = 0;
     private JScrollPane ItemScroll;
 
-    private static int sysid = 30000142;
+    private static int sysid = 10000002;
+    private static int area_type = QueryTranslator.AREA_REGION;
 
     private static Thread current_query;
 
@@ -113,13 +114,12 @@ public class InterfaceController {
             java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
 
-        ConsoleFrame.log("Doing table stuff");
+        ConsoleFrame.log("Doing interface model stuff");
 
-        selected_items_model = new CustomListModel();
+        selected_items_model = new CustomListModel(cbh);
 
         table_model = new AbstractTableModel() {
 
-            //output_table_data, QueryTranslator.table_headers
             @Override
             public Class<?> getColumnClass(int column) {
                 return QueryTranslator.table_classes[column];
@@ -167,6 +167,8 @@ public class InterfaceController {
 
         equeue.registerEventFunction(EventType.SET_SYS_CALLBACK, this::UpdateSysIDCallback);
 
+        equeue.registerEventFunction(EventType.SET_SYS_TYPE, OneArg(this::UpdateAreaType));
+        
         equeue.registerEventFunction(EventType.START_QUERY, NoArgs(this::OnQuery));
 
         equeue.registerEventFunction(EventType.SET_PARSER, OneArg(this::UpdateQueryDecoder));
@@ -238,6 +240,7 @@ public class InterfaceController {
         cbh.start();
 
         LayoutManager layout = ItemGroupPanel.getLayout();
+        
         if (layout instanceof TreePanelLayout) {
 
             ((TreePanelLayout) layout).addLayoutEventListener(() -> {
@@ -252,8 +255,6 @@ public class InterfaceController {
         } else {
             ConsoleFrame.log_error("Warning: ItemGroup Panel doesn't have a TreePanelLayout");
         }
-
-        ConsoleFrame.log("Loading ConfigBox Model");
 
     }
 
@@ -342,6 +343,10 @@ public class InterfaceController {
 
     }
 
+    public void UpdateAreaType(Integer type) {
+        area_type = type;
+    }
+    
     public void UpdateQueryDecoder(String item) {
 
         try {
@@ -406,6 +411,8 @@ public class InterfaceController {
 
     public void UpdateCurrentConfig(String item) {
         Configuration.setActive(item);
+        QueryTranslator.setActiveParser(Configuration.get("query-parser"));
+        QueryTranslator.setActiveTable(Configuration.get("query-table"));
 
         equeue.queueEvent(EventType.REVALIDATE_COMBOBOXES);
     }
@@ -456,7 +463,7 @@ public class InterfaceController {
                 int[] subids = Arrays.copyOfRange(ids, Math.max(0, i - numperquery), i);
 
                 try {
-                    output_table_data.addAll(DatabaseManager.getMarketInfoBulk(subids, sysid));
+                    output_table_data.addAll(DatabaseManager.getMarketInfoBulk(subids, sysid, area_type));
                 } catch (LuaError e) {
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(null,
@@ -481,7 +488,7 @@ public class InterfaceController {
         } else {
 
             try {
-                output_table_data.addAll(DatabaseManager.getMarketInfoBulk(ids, sysid));
+                output_table_data.addAll(DatabaseManager.getMarketInfoBulk(ids, sysid, area_type));
             } catch (LuaError e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(null,
@@ -505,6 +512,8 @@ public class InterfaceController {
             output_table_data.removeIf(v -> Double.isNaN((double) v.get(1)) || Double.isInfinite((double) v.get(1)));
         }
 
+        System.out.println(output_table_data);
+        
         table_model.fireTableDataChanged();
 
         current_query.interrupt();
@@ -548,6 +557,12 @@ public class InterfaceController {
 
     private class CustomListModel extends AbstractListModel {
 
+        private CheckBoxHandler cbh;
+        
+        public CustomListModel(CheckBoxHandler cbh) {
+            this.cbh = cbh;
+        }
+        
         public void fireDataChanged() {
             this.fireContentsChanged(this, 0, getSize() - 1);
         }

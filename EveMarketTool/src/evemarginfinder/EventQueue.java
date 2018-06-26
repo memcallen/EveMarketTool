@@ -51,6 +51,7 @@ public class EventQueue {
         ITEM_SEARCH(String.class),
         STOP_ITEM_SEARCH,
         SET_SYSTEM(String.class),
+        SET_SYS_TYPE(Integer.class),
         SET_SYS_CALLBACK(String.class, Consumer.class),
         SET_PARSER(String.class),
         SET_GENERATOR(String.class),
@@ -140,13 +141,32 @@ public class EventQueue {
         }
         
         for(int i = 0; i < clazz.length; i++) {
-            if(objs[i].getClass() != clazz[i]) {
+            if(!clazz[i].isAssignableFrom(objs[i].getClass())) {
                 return false;
             }
         }
         
         return true;
         
+    }
+    
+    public static String ArrayToString(Object[] array) {
+        if(array == null) {
+            return "null";
+        }
+        
+        StringBuilder sb = new StringBuilder("[");
+        
+        for(int i = 0; i < array.length; i++) {
+            sb.append(array[i]);
+            if(i < array.length - 1) {
+                sb.append(", ");
+            }
+        }
+        
+        sb.append("]");
+        
+        return sb.toString();
     }
     
     public void run() {
@@ -198,7 +218,8 @@ public class EventQueue {
     public int queueEvent(EventType type, Object... arguments) {
 
         if(!TypesMatch(type.GetParamTypes(), arguments)) {
-            throw new IllegalArgumentException("EventQueue Arguments don't match required types for " + type.name());
+            throw new IllegalArgumentException("EventQueue Arguments don't match required types for " + type.name() +
+                    " (" + ArrayToString(type.GetParamTypes()) + " & " + ArrayToString(arguments) + ")");
         }
         
         if (events.containsKey(type)) {

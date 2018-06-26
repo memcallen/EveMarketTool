@@ -61,6 +61,8 @@ public final class MainFrame extends javax.swing.JFrame {
 
         controller.post_component_init(GroupScroll, ItemScroll, ItemGroupPanel, ItemPanel, output_table, NumSelected);
 
+        equeue.queueEvent(EventType.REVALIDATE_COMBOBOXES);
+        
         ConsoleFrame.log("Packing");
         pack();
 
@@ -72,6 +74,7 @@ public final class MainFrame extends javax.swing.JFrame {
 
         jCheckBox2 = new javax.swing.JCheckBox();
         jButton1 = new javax.swing.JButton();
+        LocationButtonGroup = new javax.swing.ButtonGroup();
         TabbedPane = new javax.swing.JTabbedPane();
         SelectionPanel = new javax.swing.JPanel();
         GroupScroll = new javax.swing.JScrollPane();
@@ -92,10 +95,13 @@ public final class MainFrame extends javax.swing.JFrame {
         selected_items = new javax.swing.JList();
         jScrollPane1 = new javax.swing.JScrollPane();
         output_table = new javax.swing.JTable(controller.table_model);
-        jLabel8 = new javax.swing.JLabel();
-        system_id = new javax.swing.JTextField();
         rem_inv = new javax.swing.JCheckBox();
         show_filters = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
+        system_id = new javax.swing.JTextField();
+        station_button = new javax.swing.JRadioButton();
+        system_button = new javax.swing.JRadioButton();
+        region_button = new javax.swing.JRadioButton();
         SettingsPanel = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         parse_decoder = new javax.swing.JComboBox<>();
@@ -200,7 +206,7 @@ public final class MainFrame extends javax.swing.JFrame {
                 load_itemsActionPerformed(evt);
             }
         });
-        InfoPanel.add(load_items, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 290, -1, -1));
+        InfoPanel.add(load_items, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 340, -1, -1));
 
         selected_items.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         selected_items.setModel(controller.selected_items_model);
@@ -214,21 +220,9 @@ public final class MainFrame extends javax.swing.JFrame {
 
         InfoPanel.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 10, 500, 390));
 
-        jLabel8.setFont(jLabel8.getFont());
-        jLabel8.setText("Station/Region");
-        InfoPanel.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 200, -1, -1));
-
-        system_id.setText("60003760");
-        system_id.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                system_idKeyTyped(evt);
-            }
-        });
-        InfoPanel.add(system_id, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 220, 80, -1));
-
         rem_inv.setFont(rem_inv.getFont());
         rem_inv.setText("Remove Invalid");
-        InfoPanel.add(rem_inv, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 260, -1, -1));
+        InfoPanel.add(rem_inv, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 310, -1, -1));
 
         show_filters.setText("Edit Filters");
         show_filters.addActionListener(new java.awt.event.ActionListener() {
@@ -236,7 +230,68 @@ public final class MainFrame extends javax.swing.JFrame {
                 show_filtersActionPerformed(evt);
             }
         });
-        InfoPanel.add(show_filters, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 170, -1, -1));
+        InfoPanel.add(show_filters, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 270, -1, -1));
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Location"));
+
+        system_id.setText("The Forge");
+        system_id.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                system_idKeyTyped(evt);
+            }
+        });
+
+        LocationButtonGroup.add(station_button);
+        station_button.setText("Station");
+        station_button.setActionCommand("0");
+        station_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                area_buttonActionPerformed(evt);
+            }
+        });
+
+        LocationButtonGroup.add(system_button);
+        system_button.setText("System");
+        system_button.setActionCommand("1");
+        system_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                area_buttonActionPerformed(evt);
+            }
+        });
+
+        LocationButtonGroup.add(region_button);
+        region_button.setSelected(true);
+        region_button.setText("Region");
+        region_button.setActionCommand("2");
+        region_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                area_buttonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(station_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(system_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(system_id, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
+            .addComponent(region_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(system_id, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(station_button)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(system_button)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(region_button)
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+
+        InfoPanel.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 90, 110, 150));
 
         TabbedPane.addTab("Info", InfoPanel);
 
@@ -469,7 +524,14 @@ public final class MainFrame extends javax.swing.JFrame {
 
         if (evt.getKeyChar() == '\n') {
 
-            equeue.queueEvent(EventType.SET_SYS_CALLBACK, system_id.getText(), (Consumer<String>) system_id::setToolTipText);
+            Consumer<String> callback = new Consumer<String>() {
+                @Override
+                public void accept(String t) {
+                    system_id.setToolTipText(t);
+                }
+            };
+
+            equeue.queueEvent(EventType.SET_SYS_CALLBACK, system_id.getText(), callback);
 
         }
 
@@ -546,28 +608,40 @@ public final class MainFrame extends javax.swing.JFrame {
         if (name == null) {
             return;
         }
-        
+
         equeue.queueEvent(EventType.CREATE_CONFIG, name);
-        
+
     }//GEN-LAST:event_cfg_addActionPerformed
 
     private void cfg_removeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cfg_removeActionPerformed
 
         int choice = JOptionPane.showConfirmDialog(this, "Save Config?");
-        
-        if(choice == JOptionPane.CANCEL_OPTION) {
+
+        if (choice == JOptionPane.CANCEL_OPTION) {
             return;
         }
-        
+
         equeue.queueEvent(EventType.REMOVE_CURR_CONFIG, choice == JOptionPane.YES_OPTION);
-        
+
     }//GEN-LAST:event_cfg_removeActionPerformed
 
     private void show_filtersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_show_filtersActionPerformed
-        
+
         equeue.queueEvent(EventType.EDIT_FILTERS);
-        
+
     }//GEN-LAST:event_show_filtersActionPerformed
+
+    private void area_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_area_buttonActionPerformed
+        String button = LocationButtonGroup.getSelection().getActionCommand();
+
+        try {
+            int b = Integer.parseInt(button);
+
+            equeue.queueEvent(EventType.SET_SYS_TYPE, b);
+        } catch (NumberFormatException e) {
+            ConsoleFrame.log_error("Error parsing area button info: " + e.getMessage());
+        }
+    }//GEN-LAST:event_area_buttonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane GroupScroll;
@@ -577,6 +651,7 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel ItemPanel;
     private javax.swing.JScrollPane ItemScroll;
     private javax.swing.JTextField ItemSearch;
+    private javax.swing.ButtonGroup LocationButtonGroup;
     private javax.swing.JTextField NumSelected;
     private javax.swing.JPanel SelectionPanel;
     private javax.swing.JPanel SettingsPanel;
@@ -596,8 +671,8 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
@@ -607,9 +682,12 @@ public final class MainFrame extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> parse_decoder;
     private javax.swing.JButton parse_reload;
     private javax.swing.JComboBox<String> parse_table;
+    private javax.swing.JRadioButton region_button;
     private javax.swing.JCheckBox rem_inv;
     private javax.swing.JList selected_items;
     private javax.swing.JButton show_filters;
+    private javax.swing.JRadioButton station_button;
+    private javax.swing.JRadioButton system_button;
     private javax.swing.JTextField system_id;
     // End of variables declaration//GEN-END:variables
 }
