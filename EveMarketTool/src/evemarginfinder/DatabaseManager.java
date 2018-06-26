@@ -44,7 +44,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
-import java.util.Vector;
 
 /**
  *
@@ -84,9 +83,9 @@ public class DatabaseManager extends Thread {
 
     public static JsonParser parser = new JsonParser();
 
-    public static List<List> getMarketInfoBulk(int[] itemid, int sysid) throws IOException {
+    public static List<List> getMarketInfoBulk(int[] itemid, int sysid, int area_type) throws IOException {
 
-        String url = QueryTranslator.getURL(itemid, sysid, false);
+        String url = QueryTranslator.getURL(itemid, sysid, area_type);
 
         ConsoleFrame.log("Querying " + url);
 
