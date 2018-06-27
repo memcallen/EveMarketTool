@@ -49,6 +49,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JCheckBox;
 import org.luaj.vm2.LuaError;
 
@@ -168,7 +170,7 @@ public class InterfaceController {
         equeue.registerEventFunction(EventType.SET_SYS_CALLBACK, this::UpdateSysIDCallback);
 
         equeue.registerEventFunction(EventType.SET_SYS_TYPE, OneArg(this::UpdateAreaType));
-        
+
         equeue.registerEventFunction(EventType.START_QUERY, NoArgs(this::OnQuery));
 
         equeue.registerEventFunction(EventType.SET_PARSER, OneArg(this::UpdateQueryDecoder));
@@ -176,7 +178,7 @@ public class InterfaceController {
         equeue.registerEventFunction(EventType.RELOAD_CURR_CONFIG, NoArgs(this::ReloadCurrentConfig));
 
         equeue.registerEventFunction(EventType.REVALIDATE_ITEMLIST, NoArgs(this::RevalidateItemList));
-        
+
         equeue.registerEventFunction(EventType.REVALIDATE_COMBOBOXES, NoArgs(this::RevalidateComboBoxes));
 
         equeue.registerEventFunction(EventType.REVALIDATE_TABLE_HEADERS, NoArgs(this::RevalidateTableHeaders));
@@ -194,11 +196,11 @@ public class InterfaceController {
         equeue.registerEventFunction(EventType.OPEN_NEW_CONFIG, this::OpenNewConfig);
 
         equeue.registerEventFunction(EventType.CREATE_CONFIG, OneArg(this::CreateConfig));
-        
+
         equeue.registerEventFunction(EventType.REMOVE_CURR_CONFIG, OneArg(this::RemoveCurrentConfig));
-        
+
         equeue.registerEventFunction(EventType.EDIT_FILTERS, NoArgs(this::EditFilter));
-        
+
     }
 
     /**
@@ -240,7 +242,7 @@ public class InterfaceController {
         cbh.start();
 
         LayoutManager layout = ItemGroupPanel.getLayout();
-        
+
         if (layout instanceof TreePanelLayout) {
 
             ((TreePanelLayout) layout).addLayoutEventListener(() -> {
@@ -346,7 +348,7 @@ public class InterfaceController {
     public void UpdateAreaType(Integer type) {
         area_type = type;
     }
-    
+
     public void UpdateQueryDecoder(String item) {
 
         try {
@@ -367,12 +369,12 @@ public class InterfaceController {
     public void RevalidateItemList() {
         selected_items_model.fireDataChanged();
     }
-    
+
     public void RevalidateComboBoxes() {
         config_selector_model.setSelectedItem(Configuration.getCName());
         parse_decoder_model.setSelectedItem2(QueryTranslator.active_parser);
         parse_table_model.setSelectedItem2(QueryTranslator.active_table);
-        
+
         config_selector_model.fireDataChanged();
         parse_decoder_model.fireDataChanged();
         parse_table_model.fireDataChanged();
@@ -432,12 +434,65 @@ public class InterfaceController {
         current_query.start();
     }
 
+    private int min(int one, int two) {
+        return one > two ? two : one;
+    }
+
+    private void QueryRunnable() {
+
+        output_table_data.clear();
+
+        if (sysid == -1) {
+            JOptionPane.showMessageDialog(frame, "Invalid System ID/Name", "Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int[] ids = cbh.getItems();
+
+        if (ids == null) {
+            return;
+        }
+
+        int numperquery = 20;
+        int i1 = 0, i2 = min(ids.length, numperquery);
+
+        while (i1 < ids.length) {
+
+            int[] subids = Arrays.copyOfRange(ids, i1, i2);
+
+            try {
+                output_table_data.addAll(DatabaseManager.getMarketInfoBulk(subids, sysid, area_type));
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null,
+                        e.getMessage().length() > 100 ? e.getMessage().substring(0, 100) + "..." : e.getMessage(),
+                        "Error in lua script", JOptionPane.ERROR_MESSAGE);
+                ConsoleFrame.log_error(e.getMessage());
+                break;
+            }
+            
+            i1 = min(i1 + numperquery, ids.length);
+            i2 = min(i2 + numperquery, ids.length);
+            
+        }
+
+        if (filter.asBool("Remove_Invalid")) {
+            output_table_data.removeIf(v -> Double.isNaN((double) v.get(1)) || Double.isInfinite((double) v.get(1)));
+        }
+
+        System.out.println(output_table_data);
+
+        table_model.fireTableDataChanged();
+
+        current_query.interrupt();
+    }
+
     /**
      *
      * TODO: re-work this <br>
      * Called by {@link OnQuery}
      */
-    private void QueryRunnable() {
+    @Deprecated
+    private void _QueryRunnable() {
 
         output_table_data.clear();
 
@@ -513,7 +568,7 @@ public class InterfaceController {
         }
 
         System.out.println(output_table_data);
-        
+
         table_model.fireTableDataChanged();
 
         current_query.interrupt();
@@ -539,9 +594,9 @@ public class InterfaceController {
 
         equeue.queueEvent(EventType.REVALIDATE_COMBOBOXES);
     }
-    
+
     public void RemoveCurrentConfig(Boolean save) {
-        
+
         try {
             Configuration.removeCurrent(save);
         } catch (IOException ex) {
@@ -558,15 +613,15 @@ public class InterfaceController {
     private class CustomListModel extends AbstractListModel {
 
         private CheckBoxHandler cbh;
-        
+
         public CustomListModel(CheckBoxHandler cbh) {
             this.cbh = cbh;
         }
-        
+
         public void fireDataChanged() {
             this.fireContentsChanged(this, 0, getSize() - 1);
         }
-        
+
         @Override
         public int getSize() {
             if (cbh.getItemsConst() != null) {
@@ -581,5 +636,5 @@ public class InterfaceController {
             return DatabaseManager.queryItemName(cbh.getItemsConst()[index]);
         }
     }
-    
+
 }
