@@ -110,7 +110,6 @@ public class FilterPanel extends javax.swing.JPanel {
         jPanel3.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 0, 0));
 
         exit_button.setText("X");
-        exit_button.setMargin(new java.awt.Insets(0, 0, 0, 0));
         exit_button.setMaximumSize(new java.awt.Dimension(40, 20));
         exit_button.setMinimumSize(new java.awt.Dimension(40, 20));
         exit_button.setPreferredSize(new java.awt.Dimension(40, 20));

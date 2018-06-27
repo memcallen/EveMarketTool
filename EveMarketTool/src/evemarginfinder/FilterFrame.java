@@ -23,7 +23,6 @@
  */
 package evemarginfinder;
 
-import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.SwingUtilities;
@@ -33,9 +32,9 @@ import javax.swing.SwingUtilities;
  * @author Memcallen Kahoudi/Recursive Pineapple
  */
 public class FilterFrame extends javax.swing.JFrame {
-    
+
     private final List<FilterPanel> panels = new ArrayList<>();
-    
+
     /**
      * Creates new form FilterFrame
      */
@@ -43,43 +42,38 @@ public class FilterFrame extends javax.swing.JFrame {
         initComponents();
     }
 
-    public void loadCfg(){
+    public void loadCfg() {
         Configuration.stream()
                 .filter(e -> e.getKey().startsWith("filter-"))
                 .forEach(e -> add(e.getKey().replace("filter-", ""), e.getValue()));
-        
+
         filter.revalidate();
-        
     }
-    
+
     public boolean asBool(String key) {
         String value = get(key);
-        if(value == null) {
+        if (value == null) {
             return false;
         }
-        
+
         value = value.toLowerCase().trim();
-        
-        if(value.equals("true") || value.equals("yes") || value.equals("1")) {
-            return true;
-        }else{
-            return false;
-        }
-        
+
+        return value.equals("true") || value.equals("yes") || value.equals("1");
+
     }
-    
-    public String get(String key){
-        for(FilterPanel panel : panels){
-            if(panel.key().equals(key)){
+
+    public String get(String key) {
+        for (FilterPanel panel : panels) {
+            if (panel.key().equals(key)) {
                 return panel.value();
             }
         }
         return null;
     }
-    
-    public boolean set(String key, String value){
-        for(FilterPanel panel : panels){
-            if(panel.key().equals(key)){
+
+    public boolean set(String key, String value) {
+        for (FilterPanel panel : panels) {
+            if (panel.key().equals(key)) {
                 panel.setVal(value);
                 panel.repaint();
                 return true;
@@ -87,50 +81,50 @@ public class FilterFrame extends javax.swing.JFrame {
         }
         return false;
     }
-    
-    public void saveCfg(){
+
+    public void saveCfg() {
         panels.stream().forEach((p) -> {
-            Configuration.set("filter-" + p.key(), p.value());
+            if (!p.key().isEmpty()) {
+                Configuration.set("filter-" + p.key(), p.value());
+            }
         });
     }
-    
-    public FilterPanel add(){
+
+    public FilterPanel add() {
         return add("", "");
     }
-    
-    public FilterPanel add(String key, String value){
+
+    public FilterPanel add(String key, String value) {
         FilterPanel p = new FilterPanel(this);
-        
+
         p.sKey(key);
         p.setVal(value);
-        
-        
+
         panels.add(p);
-        Component[] child = filter.getComponents();
-        filter.add(p, child.length >= 2 ?  child.length - 2 : 0);
-        
+        filter.add(p, 0);
+
         filter.revalidate();
         filter.repaint();
-        
+
         return p;
     }
-    
-    public boolean remove(FilterPanel p){
+
+    public boolean remove(FilterPanel p) {
         boolean suc = panels.remove(p);
         filter.remove(p);
-        
+
         filter.revalidate();
         filter.repaint();
-        
+
         return suc;
     }
-    
-    public static void main(String[] args){
-        SwingUtilities.invokeLater(()->{
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
             new FilterFrame().setVisible(true);
         });
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -149,7 +143,7 @@ public class FilterFrame extends javax.swing.JFrame {
         setMinimumSize(new java.awt.Dimension(373, 300));
         setName("Filters"); // NOI18N
 
-        filter.setLayout(new javax.swing.BoxLayout(filter, javax.swing.BoxLayout.PAGE_AXIS));
+        filter.setLayout(new javax.swing.BoxLayout(filter, javax.swing.BoxLayout.Y_AXIS));
         filter.add(filler1);
 
         jScrollPane1.setViewportView(filter);
