@@ -32,7 +32,6 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 /**
  *
@@ -47,7 +46,7 @@ public class HideableTreeNode extends TreeNode<Component> {
     private final JLabel icon = new JLabel();
     private final Component comp;
 
-    private final Icon closed, opened, leaf;
+    private final Icon ticon = new TreeIcon(16, 16, this);
 
     public HideableTreeNode(Component comp) {
         super(comp);
@@ -59,18 +58,15 @@ public class HideableTreeNode extends TreeNode<Component> {
             }
         });
 
+        icon.setIcon(ticon);
+        icon.setSize(icon.getIcon().getIconWidth(), icon.getIcon().getIconHeight());
+        
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
         panel.add(icon);
         panel.add(comp);
         
         this.comp = comp;
-
-        closed = (Icon) UIManager.get("Tree.closedIcon");
-        opened = (Icon) UIManager.get("Tree.openIcon");
-        leaf = (Icon) UIManager.get("Tree.leafIcon");
-
-        UpdateIcon();
 
     }
 
@@ -94,8 +90,6 @@ public class HideableTreeNode extends TreeNode<Component> {
         HideableTreeNode node = new HideableTreeNode(value);
 
         AddChild(this, node);
-
-        UpdateIcon();
 
         return node;
     }
@@ -121,18 +115,6 @@ public class HideableTreeNode extends TreeNode<Component> {
 
     }
 
-    public void UpdateIcon() {
-
-        if (isLeaf()) {
-            icon.setIcon(leaf);
-        } else {
-            icon.setIcon(visible ? opened : closed);
-        }
-
-        icon.setSize(icon.getIcon().getIconWidth(), icon.getIcon().getIconHeight());
-
-    }
-
     /**
      * Updates the visibility of this node, based on the parents' visibility
      */
@@ -151,7 +133,6 @@ public class HideableTreeNode extends TreeNode<Component> {
         actual_visible = parent_visible && visible;
 
         //update the components eventually
-        UpdateIcon();
         SwingUtilities.invokeLater(panel::revalidate);
     }
 
