@@ -49,7 +49,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.function.Consumer;
+import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
+import javax.swing.JRadioButton;
 import org.luaj.vm2.LuaError;
 
 /**
@@ -84,6 +86,8 @@ public class InterfaceController {
     public ItemGroup group_last_ig = null;
     public int item_search_index = 0;
     private JScrollPane ItemScroll;
+    // {station, system, region}
+    private JRadioButton[] locbuttons;
 
     private static int sysid = 10000002;
     private static int area_type = QueryTranslator.AREA_REGION;
@@ -167,6 +171,8 @@ public class InterfaceController {
 
         equeue.registerEventFunction(EventType.REVALIDATE_COMBOBOXES, NoArgs(this::RevalidateComboBoxes));
 
+        equeue.registerEventFunction(EventType.REVALIDATE_LOC_RADIO, NoArgs(this::RevalidateLocationRButtons));
+
         equeue.registerEventFunction(EventType.REVALIDATE_TABLE_HEADERS, NoArgs(this::RevalidateTableHeaders));
 
         equeue.registerEventFunction(EventType.REVALIDATE_TABLE_DATA, NoArgs(this::RevalidateTableData));
@@ -198,11 +204,13 @@ public class InterfaceController {
      * @param ItemPanel
      * @param output_table
      * @param NumSelected
+     * @param locbuttons {station, system, region}
      */
     public void post_component_init(JScrollPane GroupScroll, JScrollPane ItemScroll, JPanel ItemGroupPanel,
-            JPanel ItemPanel, JTable output_table, JTextField NumSelected) {
+            JPanel ItemPanel, JTable output_table, JTextField NumSelected, JRadioButton[] locbuttons) {
 
         this.ItemScroll = ItemScroll;
+        this.locbuttons = locbuttons;
 
         GroupScroll.getVerticalScrollBar().setUnitIncrement(20);
         ItemScroll.getVerticalScrollBar().setUnitIncrement(20);
@@ -366,6 +374,15 @@ public class InterfaceController {
         parse_table_model.fireDataChanged();
     }
 
+    public void RevalidateLocationRButtons() {
+        String vis = Configuration.get("loc-vis");
+
+        locbuttons[0].setEnabled(vis.contains("station"));
+        locbuttons[1].setEnabled(vis.contains("system"));
+        locbuttons[2].setEnabled(vis.contains("region"));
+
+    }
+
     public void RevalidateTableHeaders() {
         QueryTranslator.loadHeaders();
         table_model.fireTableStructureChanged();
@@ -403,6 +420,7 @@ public class InterfaceController {
         QueryTranslator.setActiveTable(Configuration.get("query-table"));
 
         equeue.queueEvent(EventType.REVALIDATE_COMBOBOXES);
+        equeue.queueEvent(EventType.REVALIDATE_LOC_RADIO);
     }
 
     public void OnQuery() {
@@ -455,10 +473,10 @@ public class InterfaceController {
                 ConsoleFrame.log_error(e.getMessage());
                 break;
             }
-            
+
             i1 = min(i1 + numperquery, ids.length);
             i2 = min(i2 + numperquery, ids.length);
-            
+
         }
 
         if (filter.asBool("Remove_Invalid")) {

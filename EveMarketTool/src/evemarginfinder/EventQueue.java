@@ -45,6 +45,7 @@ public class EventQueue {
         REVALIDATE_TABLE_HEADERS,
         REVALIDATE_TABLE_DATA,
         REVALIDATE_COMBOBOXES,
+        REVALIDATE_LOC_RADIO,
         START_QUERY,
         GROUP_SEARCH(String.class),
         STOP_GROUP_SEARCH,

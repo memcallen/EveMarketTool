@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
@@ -59,7 +60,8 @@ public final class MainFrame extends javax.swing.JFrame {
         ConsoleFrame.log("Initing components");
         initComponents();
 
-        controller.post_component_init(GroupScroll, ItemScroll, ItemGroupPanel, ItemPanel, output_table, NumSelected);
+        controller.post_component_init(GroupScroll, ItemScroll, ItemGroupPanel, ItemPanel, output_table, NumSelected,
+                new JRadioButton[]{station_button, system_button, region_button});
 
         equeue.queueEvent(EventType.REVALIDATE_COMBOBOXES);
         
