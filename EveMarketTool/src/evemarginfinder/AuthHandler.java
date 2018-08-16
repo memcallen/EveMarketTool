@@ -30,7 +30,7 @@ import java.nio.file.Paths;
 
 /**
  *
- * @author azalac0020
+ * @author Memcallen Kahoudi/Recursive Pineapple
  */
 public class AuthHandler {
 
