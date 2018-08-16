@@ -249,7 +249,7 @@ public class CacheFileDownloader {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void static_run_impl() throws Exception {
         //This is 100% overengineered but idc
         
         //available threads - current count - the pool thread
@@ -295,4 +295,12 @@ public class CacheFileDownloader {
 
     }
 
+    public static void static_run() {
+        try {
+            static_run_impl();
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
 }

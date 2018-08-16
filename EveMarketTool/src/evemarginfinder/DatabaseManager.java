@@ -322,8 +322,8 @@ public class DatabaseManager extends Thread {
 
     }
 
-    public static void main(String[] args) {
-
+    public static void init_logfile() {
+        
         if (!LOGFILE.exists()) {
             try {
                 LOGFILE.createNewFile();
@@ -343,6 +343,12 @@ public class DatabaseManager extends Thread {
             ConsoleFrame.log(ex.getMessage());
             return;
         }
+        
+    }
+    
+    public static void static_run() {
+
+        init_logfile();
         
         Thread.setDefaultUncaughtExceptionHandler((Thread t, Throwable e) -> {
             

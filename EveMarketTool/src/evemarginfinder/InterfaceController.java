@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2018 memca.
+ * Copyright 2018 memcallen
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,10 +49,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.function.Consumer;
-import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JRadioButton;
-import org.luaj.vm2.LuaError;
 
 /**
  * This class bridges the gap between EventQueue and MainFrame
@@ -490,94 +488,6 @@ public class InterfaceController {
         current_query.interrupt();
     }
 
-    /**
-     *
-     * TODO: re-work this <br>
-     * Called by {@link OnQuery}
-     */
-    @Deprecated
-    private void _QueryRunnable() {
-
-        output_table_data.clear();
-
-        if (sysid == -1) {
-            JOptionPane.showMessageDialog(frame, "Invalid System ID/Name", "Error", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        int[] ids = cbh.getItems();
-
-        if (ids == null) {
-            return;
-        }
-
-        int numperquery = 20;
-
-        if (ids.length > numperquery) {
-
-            int i = ids.length;
-
-            while (i > 0) {
-
-                int[] subids = Arrays.copyOfRange(ids, Math.max(0, i - numperquery), i);
-
-                try {
-                    output_table_data.addAll(DatabaseManager.getMarketInfoBulk(subids, sysid, area_type));
-                } catch (LuaError e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(null,
-                            e.getMessage().length() > 100 ? e.getMessage().substring(0, 100) + "..." : e.getMessage(),
-                            "Error in lua script", JOptionPane.ERROR_MESSAGE);
-                    ConsoleFrame.log_error(e.getMessage());
-                    break;
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(null,
-                            e.getMessage().length() > 100 ? e.getMessage().substring(0, 100) + "..." : e.getMessage(),
-                            "Error Connecting to API", JOptionPane.ERROR_MESSAGE);
-                    ConsoleFrame.log_error(e.getMessage());
-                    break;
-                }
-
-                i -= numperquery;
-
-            }
-
-        } else {
-
-            try {
-                output_table_data.addAll(DatabaseManager.getMarketInfoBulk(ids, sysid, area_type));
-            } catch (LuaError e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(null,
-                        e.getMessage().length() > 100 ? e.getMessage().substring(0, 100) + "..." : e.getMessage(),
-                        "Error in lua script", JOptionPane.ERROR_MESSAGE);
-                ConsoleFrame.log_error(e.getMessage());
-                return;
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(null,
-                        e.getMessage().length() > 100 ? e.getMessage().substring(0, 100) + "..." : e.getMessage(),
-                        "Error Connecting to API", JOptionPane.ERROR_MESSAGE);
-                ConsoleFrame.log_error(e.getMessage());
-                return;
-            }
-
-        }
-
-        if (filter.asBool("Remove_Invalid")) {
-            output_table_data.removeIf(v -> Double.isNaN((double) v.get(1)) || Double.isInfinite((double) v.get(1)));
-        }
-
-        System.out.println(output_table_data);
-
-        table_model.fireTableDataChanged();
-
-        current_query.interrupt();
-    }
-
     public void OpenNewConfig(Object[] args) {
         File file = (File) args[0];
         Consumer<FileNotFoundException> _catch = (Consumer<FileNotFoundException>) args[1];
@@ -616,7 +526,7 @@ public class InterfaceController {
 
     private class CustomListModel extends AbstractListModel {
 
-        private CheckBoxHandler cbh;
+        private final CheckBoxHandler cbh;
 
         public CustomListModel(CheckBoxHandler cbh) {
             this.cbh = cbh;

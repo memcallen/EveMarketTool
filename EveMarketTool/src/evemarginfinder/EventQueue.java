@@ -63,9 +63,10 @@ public class EventQueue {
         OPEN_NEW_CONFIG(File.class, Consumer.class),
         CREATE_CONFIG(String.class),
         REMOVE_CURR_CONFIG(Boolean.class),
-        EDIT_FILTERS;
+        EDIT_FILTERS,
+        UPDATE_AUTH_KEY(String.class);
 
-        private Class[] clazz;
+        private final Class[] clazz;
 
         public Class[] GetParamTypes() {
             return clazz;
